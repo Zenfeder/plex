@@ -1,5 +1,14 @@
-console.log('>>> plex-ui-vue2 src/main.js loaded')
+import components from './components'
 
-export function test() {
-  console.log('>>> plex-ui-vue2 build watching01...')
+const materiel = {}
+const schemas = {}
+
+const install = (Vue) => {
+  Object.keys(components).forEach((key) => {
+    Vue.component(key, components[key])
+  })
 }
+
+components.install = install
+
+export { materiel, schemas, components as default }

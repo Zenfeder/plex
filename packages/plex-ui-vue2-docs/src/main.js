@@ -1,6 +1,12 @@
-import { test } from 'plex-ui-vue2'
+import PlexUI from 'plex-ui-vue2'
+import Vue from 'vue';
+import App from './App.vue';
 
-test()
+Vue.config.productionTip = false;
 
-console.log('>>> plex-ui-vue2-docs src/main.js loaded')
+Vue.use(PlexUI)
+
+new Vue({
+  render: h => h(App),
+}).$mount('#app');
 
