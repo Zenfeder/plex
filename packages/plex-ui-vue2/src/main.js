@@ -11,5 +11,5 @@ add(a, b).then((res) => {
 })
 
 export function test() {
-  console.log('test ui')
+  console.log('test build new umd filename')
 }

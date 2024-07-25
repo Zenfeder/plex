@@ -2,8 +2,6 @@ const path = require('path')
 const fs = require('fs');
 const webpack = require('webpack');
 
-let filename = 'plex-ui-vue2.umd.js'
-
 class UpdateMainPlugin {
   constructor(mode) {
     this.mode = mode;
@@ -11,28 +9,34 @@ class UpdateMainPlugin {
 
   apply(compiler) {
     compiler.hooks.initialize.tap('UpdateMainPlugin', () => {
-      console.log('>>> UpdateMainPlugin initialize')
+      if (this.mode === 'production') return
       const packageJsonPath = path.resolve(__dirname, '../package.json');
       const packageJson = require(packageJsonPath);
       if (this.mode === 'development') {
         packageJson.main = 'src/main.js';
-      } else if (this.mode === 'production') {
-        packageJson.main = 'dist/' + filename;
       }
 
       fs.writeFileSync(packageJsonPath, JSON.stringify(packageJson, null, 2));
-      console.log(`>>> Updated package.json main field to ${packageJson.main}`);
-    })
-    compiler.hooks.run.tap('UpdateMainPlugin', () => {
-      console.log('>>> UpdateMainPlugin run')
     })
 
-    compiler.hooks.watchRun.tap('UpdateMainPlugin', () => {
-      console.log('>>> UpdateMainPlugin watchRun')
-    })
+    compiler.hooks.emit.tapAsync('UpdateMainPlugin', (compilation, callback) => {
+      if (this.mode === 'development') return
+      const packageJsonPath = path.resolve(__dirname, '../package.json');
+      const packageJson = require(packageJsonPath);
 
-    compiler.hooks.watchClose.tap('UpdateMainPlugin', () => {
-      console.log('>>> UpdateMainPlugin watchClose')
+      // 获取输出的文件名
+      const outputFile = Object.keys(compilation.assets).find(filename =>
+        filename.endsWith('.js')
+      );
+
+      if (outputFile) {
+        packageJson.main = `dist/${outputFile}`;
+
+        fs.writeFileSync(packageJsonPath, JSON.stringify(packageJson, null, 2));
+        console.log(`Updated package.json main field to ${packageJson.main}`);
+      }
+
+      callback();
     })
   }
 }
@@ -45,8 +49,7 @@ module.exports = (env, args) => {
     devtool: 'inline-source-map',
     output: {
       path: path.resolve(__dirname, '../dist'),
-      // filename: '[name].[contenthash].js',
-      filename: filename,
+      filename: 'plex-ui-vue2.[contenthash].umd.js',
       clean: true,
       library: {
         name: 'PlexUiVue2',
