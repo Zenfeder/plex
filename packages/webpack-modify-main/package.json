@@ -1,0 +1,26 @@
+{
+  "name": "webpack-modify-main",
+  "version": "1.0.0",
+  "description": "动态修改包入口文件名",
+  "author": "cgg1054609489@gmail.com",
+  "homepage": "https://github.com/Zenfeder/plex#readme",
+  "license": "ISC",
+  "main": "index.js",
+  "directories": {
+    "test": "__tests__"
+  },
+  "files": [],
+  "publishConfig": {
+    "registry": "https://registry.npmmirror.com/"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Zenfeder/plex.git"
+  },
+  "scripts": {
+    "test": "node ./__tests__/webpack-modify-main.test.js"
+  },
+  "bugs": {
+    "url": "https://github.com/Zenfeder/plex/issues"
+  }
+}
