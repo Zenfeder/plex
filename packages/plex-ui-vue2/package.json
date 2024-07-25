@@ -5,7 +5,7 @@
   "author": "cgg1054609489@gmail.com",
   "homepage": "https://github.com/Zenfeder/plex#readme",
   "license": "ISC",
-  "main": "dist/plex-ui-vue2.5e0c502d752a5a641e75.umd.js",
+  "main": "src/main.js",
   "files": [
     "dist"
   ],
@@ -39,7 +39,11 @@
     "webpack-cli": "^5.1.4",
     "webpack-dev-server": "^5.0.4",
     "webpack-merge": "^6.0.1",
-    "webpack-modify-main": "^1.0.0"
+    "webpack-modify-main": "^1.0.0",
+    "vue-loader": "^15.10.0",
+    "vue-style-loader": "^4.1.3"
   },
-  "dependencies": {}
+  "dependencies": {
+    "vue": "^2.7.16"
+  }
 }

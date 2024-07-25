@@ -1,5 +1,6 @@
 const path = require('path')
 const webpackModifyMain = require('webpack-modify-main')
+const { VueLoaderPlugin } = require('vue-loader')
 
 const outputDir = 'dist'
 
@@ -17,6 +18,10 @@ module.exports = {
   },
   module: {
     rules: [
+      {
+        test: /\.vue$/,
+        loader: 'vue-loader'
+      },
       {
         test: /\.js$/,
         exclude: /(node_modules|bower_components)/,
@@ -42,7 +47,14 @@ module.exports = {
       }
     ]
   },
+  resolve: {
+    alias: {
+      vue$: 'vue/dist/vue.esm.js'
+    },
+    extensions: ['*', '.js', '.vue', '.json']
+  },
   plugins: [
+    new VueLoaderPlugin(),
     new webpackModifyMain({
       developmentMain: 'src/main.js', // 开发环境的入口文件
       productionMainDir: outputDir // 生产环境的入口文件文件夹
