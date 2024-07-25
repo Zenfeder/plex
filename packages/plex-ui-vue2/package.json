@@ -5,7 +5,7 @@
   "author": "cgg1054609489@gmail.com",
   "homepage": "https://github.com/Zenfeder/plex#readme",
   "license": "ISC",
-  "main": "dist/plex-ui-vue2.fd545b9395b282a695ed.umd.js",
+  "main": "dist/plex-ui-vue2.5e0c502d752a5a641e75.umd.js",
   "files": [
     "dist"
   ],
@@ -38,7 +38,8 @@
     "webpack": "^5.93.0",
     "webpack-cli": "^5.1.4",
     "webpack-dev-server": "^5.0.4",
-    "webpack-merge": "^6.0.1"
+    "webpack-merge": "^6.0.1",
+    "webpack-modify-main": "^1.0.0"
   },
   "dependencies": {}
 }

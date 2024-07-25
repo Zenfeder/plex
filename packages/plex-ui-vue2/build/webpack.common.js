@@ -1,10 +1,12 @@
 const path = require('path')
-const UpdatePackageMain = require('./plugins/update-package-main')
+const webpackModifyMain = require('webpack-modify-main')
+
+const outputDir = 'dist'
 
 module.exports = {
   entry: path.resolve(__dirname, '../src/main.js'),
   output: {
-    path: path.resolve(__dirname, '../dist'),
+    path: path.resolve(__dirname, '../' + outputDir),
     filename: 'plex-ui-vue2.[contenthash].umd.js',
     clean: true,
     library: {
@@ -41,6 +43,9 @@ module.exports = {
     ]
   },
   plugins: [
-    new UpdatePackageMain()
+    new webpackModifyMain({
+      developmentMain: 'src/main.js', // 开发环境的入口文件
+      productionMainDir: outputDir // 生产环境的入口文件文件夹
+    })
   ]
 }
