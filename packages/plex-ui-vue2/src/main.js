@@ -1,15 +1,5 @@
-import { add } from './utils/test'
-
-const a = 1
-const b = 2
-
-console.time('time')
-add(a, b).then((res) => {
-  console.timeEnd('time')
-  console.log('>>> a + b = ', res)
-  console.log('hello worldhahhaha ')
-})
+console.log('>>> plex-ui-vue2 src/main.js loaded')
 
 export function test() {
-  console.log('test build new umd filename')
+  console.log('>>> plex-ui-vue2 build new watching...')
 }

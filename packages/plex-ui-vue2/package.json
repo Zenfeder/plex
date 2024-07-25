@@ -5,7 +5,7 @@
   "author": "cgg1054609489@gmail.com",
   "homepage": "https://github.com/Zenfeder/plex#readme",
   "license": "ISC",
-  "main": "dist/plex-ui-vue2.1e426cefc203182e5ea0.umd.js",
+  "main": "dist/plex-ui-vue2.fd545b9395b282a695ed.umd.js",
   "files": [
     "dist"
   ],
@@ -20,8 +20,8 @@
     "url": "git+https://github.com/Zenfeder/plex.git"
   },
   "scripts": {
-    "dev": "webpack serve --mode development --config build/webpack.common.js",
-    "build": "webpack --mode production --config build/webpack.common.js --progress",
+    "dev": "webpack serve --mode development --config build/webpack.dev.js",
+    "build": "webpack --mode production --config build/webpack.prod.js --progress",
     "test": "node ./__tests__/plex-ui-vue2.test.js"
   },
   "bugs": {
