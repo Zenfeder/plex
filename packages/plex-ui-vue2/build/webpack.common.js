@@ -11,7 +11,7 @@ module.exports = {
     filename: 'plex-ui-vue2.[contenthash].umd.js',
     clean: true,
     library: {
-      name: 'PlexUiVue2',
+      name: 'plex-ui-vue2',
       type: 'umd',
       umdNamedDefine: true
     }
