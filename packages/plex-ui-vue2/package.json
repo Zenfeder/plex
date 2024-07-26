@@ -5,7 +5,7 @@
   "author": "cgg1054609489@gmail.com",
   "homepage": "https://github.com/Zenfeder/plex#readme",
   "license": "ISC",
-  "main": "dist/plex-ui-vue2.8f4a43b7d39fb17285db.umd.js",
+  "main": "dist/plex-ui-vue2.c7bce9211df9b0ef9457.umd.js",
   "files": [
     "dist"
   ],
