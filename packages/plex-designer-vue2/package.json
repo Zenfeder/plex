@@ -45,6 +45,8 @@
   },
   "dependencies": {
     "element-ui": "^2.15.14",
+    "plex-core": "^1.0.0",
+    "plex-elementui-adaptor": "^1.0.0",
     "plex-ui-vue2": "^1.0.0",
     "vue": "^2.7.16"
   }
