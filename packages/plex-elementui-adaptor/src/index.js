@@ -2,13 +2,13 @@ import { registerVueComponentLibraryDynamic } from 'plex-core';
 import materail from './materail';
 import schemas from './schemas';
 
-async function loadElementUI ({
+async function registerElementUIDynamic ({
   libraryName = 'ELEMENT',
   libraryScriptUrl = 'https://unpkg.com/element-ui/lib/index.js',
   libraryStyleUrl = 'https://unpkg.com/element-ui/lib/theme-chalk/index.css',
   register
 }) {
-  await registerVueComponentLibraryDynamic({
+  const lib = await registerVueComponentLibraryDynamic({
     libraryName,
     libraryScriptUrl,
     libraryStyleUrl,
@@ -21,6 +21,7 @@ async function loadElementUI ({
   Object.keys(schemas).forEach(key => {
     window[libraryName][key] && (window[libraryName][key].schemas = schemas[key]);
   });
+  return lib;
 }
 
-export default loadElementUI;
+export default registerElementUIDynamic;

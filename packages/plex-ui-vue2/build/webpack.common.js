@@ -1,6 +1,7 @@
 const path = require('path')
 const webpackModifyMain = require('webpack-modify-main')
 const { VueLoaderPlugin } = require('vue-loader')
+const packageJson = require('../package.json')
 
 const outputDir = 'dist'
 
@@ -8,10 +9,10 @@ module.exports = {
   entry: path.resolve(__dirname, '../src/main.js'),
   output: {
     path: path.resolve(__dirname, '../' + outputDir),
-    filename: 'plex-ui-vue2.[contenthash].umd.js',
+    filename: '[name].[contenthash].umd.js',
     clean: true,
     library: {
-      name: 'PlexUIVue2',
+      name: packageJson.name,
       type: 'umd',
       umdNamedDefine: true
     }

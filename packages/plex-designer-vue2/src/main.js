@@ -1,12 +1,12 @@
 import Vue from 'vue';
-// import ElementUI from 'element-ui';
-// import 'element-ui/lib/theme-chalk/index.css';
+import ViewUI from 'view-design';
+import 'view-design/dist/styles/iview.css';
 import './style/index.less';
 import App from './App.vue';
 
 Vue.config.productionTip = false;
 
-// Vue.use(ElementUI);
+Vue.use(ViewUI);
 
 new Vue({
   render: h => h(App),

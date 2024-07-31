@@ -44,10 +44,10 @@
     "webpack-merge": "^6.0.1"
   },
   "dependencies": {
-    "element-ui": "^2.15.14",
     "plex-core": "^1.0.0",
     "plex-elementui-adaptor": "^1.0.0",
     "plex-ui-vue2": "^1.0.0",
+    "view-design": "^4.7.0",
     "vue": "^2.7.16"
   }
 }
