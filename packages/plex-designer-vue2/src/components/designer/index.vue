@@ -4,9 +4,16 @@
     <pd-toolbar/>
     <div class="designer-body" v-if="isLoaded">
       <pd-material class="material-box"
-        :materailList="materailList"/>
-      <pd-canvas class="canvas-box"/>
-      <pd-schema class="schema-box"/>
+        :materialList="materialList"
+        @onComponentItemClick="handleMaterialClick"/>
+
+      <pd-canvas class="canvas-box"
+        :componentsTree="componentsTree"
+        :activeComponentNode="activeComponentNode"
+        @onComponentNodeClick="handleCanvasNodeClick"/>
+
+      <pd-schema class="schema-box"
+        :activeComponentNode="activeComponentNode"/>
     </div>
   </div>
 </template>
@@ -17,8 +24,10 @@ import registerElementUIDynamic from 'plex-elementui-adaptor';
 import { registerVueComponentLibraryDynamic } from 'plex-core';
 import PdToolbar from './toolbar.vue';
 import PdMaterial from './material.vue';
-import PdCanvas from './canvas/index.vue';
+import PdCanvas from './canvas.vue';
 import PdSchema from './schema.vue';
+
+import { generateRandomString } from '../../utils/common';
 
 export default {
   name: 'PlexDesigner',
@@ -39,38 +48,63 @@ export default {
   data() {
     return {
       isLoaded: false,
-      materailList: []
+      materialList: [],
+      componentsTree: [],
+      activeComponentId: '',
+      activeComponentNode: null
     }
   },
   methods: {
     async loadComponentLib() {
-      this.materailList = [...this.materialConfig]
       this.$Loading.start();
-      for (let i = 0; i < this.materailList.length; i++) {
-        const targetLib = this.materailList[i]
-        if (!targetLib || targetLib.library) return
-        if (targetLib.libraryName === 'ELEMENT') {
-          // Element UI 适配后组件库动态注册
-          const lib = await registerElementUIDynamic({
+      try {
+        this.materialList = [...this.materialConfig]
+        for (let i = 0; i < this.materialList.length; i++) {
+          const targetLib = this.materialList[i]
+          if (!targetLib || targetLib.library) return
+          const methodName = targetLib.libraryName === 'ELEMENT' ? registerElementUIDynamic : registerVueComponentLibraryDynamic;
+          const lib = await methodName({
             libraryName: targetLib.libraryName,
             libraryScriptUrl: targetLib.libraryScriptUrl,
             libraryStyleUrl: targetLib.libraryStyleUrl,
             register: Vue,
           });
-          this.$set(targetLib, 'library', lib);
-        } else {
-          // 自定义组件库动态注册
-          const lib = await registerVueComponentLibraryDynamic({
-            libraryName: targetLib.libraryName,
-            libraryScriptUrl: targetLib.libraryScriptUrl,
-            libraryStyleUrl: targetLib.libraryStyleUrl,
-            register: Vue,
-          })
-          this.$set(targetLib, 'library', lib);
+          this.$set(targetLib, 'material', lib.material);
+          this.$set(targetLib, 'schemas', lib.schemas);
         }
+        this.$Loading.finish();
+        this.isLoaded = true;
+      } catch (err) {
+        this.$Loading.error();
+        console.error(err);
       }
-      this.$Loading.finish();
-      this.isLoaded = true
+    },
+    handleMaterialClick ({ libraryName, categoryIndex, componentIndex }) {
+      console.log(libraryName, categoryIndex, componentIndex)
+      // 在 materialList 中找到对应的组件，并将组件信息注入 componentsTree 组件树中
+      const targetLib = this.materialList.find(item => item.libraryName === libraryName)
+      if (targetLib) {
+        const targetComponent = targetLib.material.categoryList[categoryIndex].children[componentIndex];
+        const targetSchema = (targetLib.schemas && targetLib.schemas[targetComponent.type]) || { props: [], style: [], events: [] };
+
+        const newComponentNode = {
+          id: generateRandomString(),
+          libraryName,
+          categoryIndex,
+          ...targetComponent,
+          schema: {
+            props: [...targetSchema.props],
+            style: [ ...targetSchema.style ],
+            events: [ ...targetSchema.events],
+          }
+        };
+        this.componentsTree.push(newComponentNode);
+
+        this.activeComponentNode = newComponentNode;
+      }
+    },
+    handleCanvasNodeClick (node) {
+      this.activeComponentNode = node;
     }
   },
   async created() {

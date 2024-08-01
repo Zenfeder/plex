@@ -23,7 +23,7 @@ export default {
       }, {
         label: '自定义组件',
         libraryName: 'plex-ui-vue2',
-        libraryScriptUrl: 'http://localhost:3000/plex-ui-vue2/main.2ee55163985051c297a4.umd.js',
+        libraryScriptUrl: 'http://localhost:3000/plex-ui-vue2/main.200664fef5b9b358b892.umd.js',
         libraryStyleUrl: '',
       }]
     };

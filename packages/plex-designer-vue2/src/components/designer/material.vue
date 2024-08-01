@@ -16,24 +16,29 @@
       <!-- 组件 -->
       <template v-if="activeSidebarCategory === 'component'">
         <div class="sidebar-title">组件</div>
-        <Tabs>
+        <Tabs class="sidebar-tabs">
           <TabPane
-            v-for="materialItem in materailList"
-            :label="materialItem.label"
+            v-for="materialItem in materialList"
+            :label="materialItem.material && materialItem.material.label"
             :name="materialItem.libraryName"
             :key="materialItem.libraryName">
-            <div class="components-wrap" v-if="materialItem.library && materialItem.library.material">
+            <div class="components-wrap"
+              v-if="materialItem.material">
               <Collapse simple>
                 <Panel
-                  v-for="categoryItem in materialItem.library.material.categoryList"
+                  v-for="(categoryItem, categoryIndex) in materialItem.material.categoryList"
                   :key="categoryItem.label"
                   :name="categoryItem.label">
                   {{ categoryItem.label }}
                   <div slot="content" class="components-panel">
                     <div class="component-item"
-                      v-for="componentItem in categoryItem.children"
-                      :key="componentItem.value"
-                      @click="handleComponentItemClick(componentItem)">
+                      v-for="(componentItem, componentIndex) in categoryItem.children"
+                      :key="componentItem.type"
+                      @click="handleComponentItemClick({
+                        libraryName: materialItem.libraryName,
+                        categoryIndex,
+                        componentIndex
+                      })">
                       {{ componentItem.label }}
                     </div>
                   </div>
@@ -78,14 +83,18 @@ export default {
     };
   },
   props: {
-    materailList: {
+    materialList: {
       type: Array,
       default: () => []
     }
   },
   methods: {
-    handleComponentItemClick (item) {
-      console.log(item);
+    handleComponentItemClick ({ libraryName, categoryIndex, componentIndex }) {
+      this.$emit('onComponentItemClick', {
+        libraryName,
+        categoryIndex,
+        componentIndex
+      })
       // 将组件添加到画布
     }
   }
@@ -137,12 +146,17 @@ export default {
 .material-content {
   flex: 1;
   height: 100%;
+  overflow: hidden;
   background: #fff;
   border-left: 1px solid #e6e6e8;
 }
 .sidebar-title {
   padding: 10px;
 }
+.sidebar-tabs {
+  width: 100%;
+  overflow: hidden;
+} 
 .components-wrap {
   box-sizing: border-box;
   height: 100%;
