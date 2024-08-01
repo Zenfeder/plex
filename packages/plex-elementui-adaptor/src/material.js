@@ -1,5 +1,6 @@
 export default {
-  label: 'ElementUI组件库',
+  label: 'ElementUI组件',
+  code: 'ElementUI', // 每个组件库唯一值
   categoryList: [
     {
       label: "功能",
@@ -7,15 +8,15 @@ export default {
       children: [
         {
           label: "按钮",
-          value: "el-button",
+          type: "el-button",
         },
         {
           label: "输入框",
-          value: "el-input",
+          type: "el-input",
         },
         {
           label: "选择器",
-          value: "el-select",
+          type: "el-select",
         }
       ]
     },
@@ -25,19 +26,19 @@ export default {
       children: [
         {
           label: "文字链接",
-          value: "el-link",
+          type: "el-link",
         },
         {
           label: "标签",
-          value: "el-tag",
+          type: "el-tag",
         },
         {
           label: "进度条",
-          value: "el-progress",
+          type: "el-progress",
         },
         {
           label: "分割线",
-          value: "el-divider",
+          type: "el-divider",
         }
       ]
     }

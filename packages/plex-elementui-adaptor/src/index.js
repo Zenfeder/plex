@@ -1,5 +1,5 @@
 import { registerVueComponentLibraryDynamic } from 'plex-core';
-import materail from './materail';
+import material from './material';
 import schemas from './schemas';
 
 async function registerElementUIDynamic ({
@@ -16,11 +16,8 @@ async function registerElementUIDynamic ({
     needWindowVue: true
   });
 
-  window[libraryName].material = materail;
-
-  Object.keys(schemas).forEach(key => {
-    window[libraryName][key] && (window[libraryName][key].schemas = schemas[key]);
-  });
+  lib.material = { ...material };
+  lib.schemas = { ...schemas };
   return lib;
 }
 

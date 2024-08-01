@@ -5,26 +5,26 @@ const props = [
     type: 'string',
     options: ['medium', 'small', 'mini'],
     key: 'size',
-    value: '' // 默认值
+    value: 'medium' // 默认值
   },
   {
     label: '类型',
     type: 'string',
     options: ['primary', 'success', 'warning', 'danger', 'info', 'text'],
     key: 'type',
-    value: '' // 默认值
+    value: 'primary' // 默认值
   },
   {
     label: '是否朴素按钮',
     type: 'boolean',
     key: 'plain',
-    value: false
+    value: true
   },
   {
     label: '是否圆角按钮',
     type: 'boolean',
     key: 'round',
-    value: false
+    value: true
   },
   {
     label: '是否圆形按钮',
