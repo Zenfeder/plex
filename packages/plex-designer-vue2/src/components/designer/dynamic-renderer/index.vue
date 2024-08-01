@@ -8,7 +8,8 @@
       @click="handleComponentNodeClick(component)">
       <component
         :is="component.type"
-        v-bind="handleProps(component.schema.props)">
+        v-bind="handleProps(component.schema.props)"
+        :style="handleStyle(component.schema.style)">
         <!-- 递归渲染子组件 -->
         <DynamicRenderer v-if="component.children" :componentsTree="component.children" />
         <template v-else-if="component.label">{{ component.label }}</template>
@@ -43,6 +44,16 @@ export default {
         return obj;
       }, {})
     },
+    handleStyle (originStyleArray) {
+      if (!originStyleArray) return {}
+      
+      return originStyleArray.reduce((obj, style) => {
+        if (style.value || !isNaN(style.value)) {
+          obj[style.key] = !isNaN(style.value) ? style.value + 'px' : style.value; // 判断是否为数字
+        }
+        return obj;
+      }, {})
+    }
   },
   watch: {
     componentsTree: {

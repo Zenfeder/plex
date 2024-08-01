@@ -85,7 +85,7 @@ export default {
       const targetLib = this.materialList.find(item => item.libraryName === libraryName)
       if (targetLib) {
         const targetComponent = targetLib.material.categoryList[categoryIndex].children[componentIndex];
-        const targetSchema = (targetLib.schemas && targetLib.schemas[targetComponent.type]) || { props: [], style: [], events: [] };
+        const targetSchema = JSON.parse(JSON.stringify(targetLib.schemas[targetComponent.type]));
 
         const newComponentNode = {
           id: generateRandomString(),
@@ -117,7 +117,7 @@ export default {
 <style lang="less" scoped>
 @height-header: 50px;
 @width-left: 360px;
-@width-right: 260px;
+@width-right: 360px;
 @min-width-center: 600px;
 
 .designer-container {
