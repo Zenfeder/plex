@@ -37,12 +37,12 @@ export default async function registerVueComponentLibraryDynamic({
     const library = window[libraryName];
     if (library) {
       if (registerIsVueConstructor) {
+        // 全局注册
         if (library.install && typeof library.install === 'function') {
-          console.log(`>>> ${libraryName} 全局注册中: `, library);
           register.use(library)
         }
       } else if (registerIsVueComponent) {
-        console.log(`>>> ${libraryName} 局部注册中: `, library);
+        // 局部注册
         Object.keys(library).forEach(key => {
           const item = library[key]
           if (item.name && item.render) {
@@ -50,7 +50,6 @@ export default async function registerVueComponentLibraryDynamic({
           }
         });
       }
-      console.log(`>>> ${libraryName} 注册完成 `,library);
       return library;
     } else {
       console.error(` ${libraryName} 字段不在 window 对象中`);
