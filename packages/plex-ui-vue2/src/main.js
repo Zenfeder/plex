@@ -2,6 +2,9 @@
 import PlexButton from './components/plex-button';
 import PlexInput from './components/plex-input';
 
+import material from './material';
+import schemas from './schemas';
+
 // 组件列表
 const components = {
   PlexButton,
@@ -21,7 +24,15 @@ if (typeof window !== 'undefined' && window.Vue) {
 }
 
 // 命名导出组件
-export { PlexButton, PlexInput, install };
+export {
+  PlexButton,
+  PlexInput,
+  material,
+  schemas,
+  install
+};
 
 // 以便其他项目可以直接通过 import PlexUI from 'plex-ui-vue2' 使用组件库
-export default { install }
+export default {
+  install
+}
