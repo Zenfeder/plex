@@ -58,20 +58,31 @@ export default {
     async loadComponentLib() {
       this.$Loading.start();
       try {
-        this.materialList = [...this.materialConfig]
+        this.materialList = [...this.materialConfig];
         for (let i = 0; i < this.materialList.length; i++) {
-          const targetLib = this.materialList[i]
-          if (!targetLib || targetLib.library) return
-          const methodName = targetLib.libraryName === 'ELEMENT' ? registerElementUIDynamic : registerVueComponentLibraryDynamic;
-          const lib = await methodName({
-            libraryName: targetLib.libraryName,
-            libraryScriptUrl: targetLib.libraryScriptUrl,
-            libraryStyleUrl: targetLib.libraryStyleUrl,
-            register: Vue,
-          });
-          this.$set(targetLib, 'material', lib.material);
-          this.$set(targetLib, 'schemas', lib.schemas);
+          const targetLib = this.materialList[i];
+          
+          if (targetLib.library && !targetLib.libraryScriptUrl) {
+            // 通过本地npm安装依赖
+            console.log('>>> 正在通过本地npm安装依赖: ', targetLib.libraryName);
+            Vue.use(targetLib.library)
+          } else if (targetLib.libraryScriptUrl) {
+            // 通过远程地址安装依赖
+            console.log('>>> 正在通过远程地址安装依赖: ', targetLib.libraryName);
+            const methodName = targetLib.libraryName === 'ELEMENT' ? registerElementUIDynamic : registerVueComponentLibraryDynamic;
+            const lib = await methodName({
+              libraryName: targetLib.libraryName,
+              libraryScriptUrl: targetLib.libraryScriptUrl,
+              libraryStyleUrl: targetLib.libraryStyleUrl,
+              register: Vue,
+            });
+            this.$set(targetLib, 'material', lib.material);
+            this.$set(targetLib, 'schemas', lib.schemas);
+          } else {
+            console.error(`组件库 ${targetLib.libraryName} 配置缺少 library 或 libraryScriptUrl`);
+          }
         }
+        console.log('>>> 组件库列表安装完成: ', this.materialList);
         this.$Loading.finish();
         this.isLoaded = true;
       } catch (err) {
@@ -117,7 +128,7 @@ export default {
 <style lang="less" scoped>
 @height-header: 50px;
 @width-left: 360px;
-@width-right: 360px;
+@width-right: 320px;
 @min-width-center: 600px;
 
 .designer-container {
