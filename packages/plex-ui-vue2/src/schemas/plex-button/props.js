@@ -10,9 +10,9 @@ const props = [
   {
     label: '类型',
     type: 'string',
-    options: ['primary', 'success', 'warning', 'danger', 'info', 'text'],
+    options: ['default', 'primary', 'success', 'warning', 'danger'],
     key: 'type',
-    value: '' // 默认值
+    value: 'default' // 默认值
   },
   {
     label: '是否朴素按钮',

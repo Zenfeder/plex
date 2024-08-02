@@ -1,6 +1,6 @@
 // 导入组件
 import PlexButton from './components/plex-button';
-import PlexInput from './components/plex-input';
+import PlexContainerLayout from './components/plex-container-layout';
 
 import material from './material';
 import schemas from './schemas';
@@ -8,7 +8,7 @@ import schemas from './schemas';
 // 组件列表
 const components = {
   PlexButton,
-  PlexInput
+  PlexContainerLayout
 };
 
 // 定义 install 方法
@@ -26,7 +26,7 @@ if (typeof window !== 'undefined' && window.Vue) {
 // 命名导出组件
 export {
   PlexButton,
-  PlexInput,
+  PlexContainerLayout,
   material,
   schemas,
   install

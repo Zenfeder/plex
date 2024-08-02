@@ -1,7 +1,7 @@
 import Button from './plex-button';
-import Input from './plex-input';
+import ContainerLayout from './plex-container-layout';
 
 export default {
   'plex-button': Button,
-  'plex-input': Input
+  'plex-container-layout': ContainerLayout
 }
