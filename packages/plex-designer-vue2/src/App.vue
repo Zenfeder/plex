@@ -22,8 +22,8 @@ export default {
         // 远程组件
         {
           libraryName: 'ELEMENT',
-          libraryScriptUrl: 'https://unpkg.com/element-ui/lib/index.js',
-          libraryStyleUrl: 'https://unpkg.com/element-ui/lib/theme-chalk/index.css',
+          libraryScriptUrl: 'http://localhost:3000/element-ui@2.15.14/index.js',
+          libraryStyleUrl: 'http://localhost:3000/element-ui@2.15.14/index.css',
         },
         // 本地开发自定义组件
         {

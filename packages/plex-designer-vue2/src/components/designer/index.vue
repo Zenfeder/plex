@@ -10,16 +10,18 @@
       <pd-canvas class="canvas-box"
         :componentsTree="componentsTree"
         :activeComponentNode="activeComponentNode"
-        @onComponentNodeClick="handleCanvasNodeClick"/>
+        @onComponentNodeClick="handleComponentNodeClick"
+        @onComponentNodeMoveDown="handleComponentNodeMoveDown"
+        @onComponentNodeMoveUp="handleComponentNodeMoveUp"
+        @onComponentNodeDelete="handleComponentNodeDelete"
+        @setActiveNodeMaskStyle="handleSetActiveNodeMaskStyle"/>
 
-      <pd-schema class="schema-box"
-        :activeComponentNode="activeComponentNode"/>
+      <pd-schema class="schema-box" :activeComponentNode="activeComponentNode"/>
     </div>
   </div>
 </template>
 
 <script>
-import Vue from 'vue';
 import registerElementUIDynamic from 'plex-elementui-adaptor';
 import { registerVueComponentLibraryDynamic } from 'plex-core';
 import PdToolbar from './toolbar.vue';
@@ -28,6 +30,14 @@ import PdCanvas from './canvas.vue';
 import PdSchema from './schema.vue';
 
 import { generateRandomString } from '../../utils/common';
+import {
+  findComponentNodeById,
+  swapWithNextSibling,
+  swapWithPreviousSibling,
+  insertBeforeSibling,
+  insertAfterSibling,
+  deleteComponentNodeById
+} from '../../utils/component-tree-tools';
 
 export default {
   name: 'PlexDesigner',
@@ -50,11 +60,35 @@ export default {
       isLoaded: false,
       materialList: [],
       componentsTree: [],
-      activeComponentId: '',
-      activeComponentNode: null
+      activeComponentNodeId: ''
     }
   },
+  computed: {
+    activeComponentNode() {
+      return findComponentNodeById(this.componentsTree, this.activeComponentNodeId);
+    }
+  },
+  async created() {
+    this.loadComponentLib();
+  },
   methods: {
+    handleComponentNodeClick (componentNode) {
+      this.activeComponentNodeId = componentNode.id
+    },
+    handleSetActiveNodeMaskStyle (style) {
+      const activeNode = findComponentNodeById(this.componentsTree, this.activeComponentNodeId);
+      this.$set(activeNode, 'maskStyle', style)
+    },
+    handleComponentNodeMoveDown (componentNode) {
+      this.componentsTree = swapWithNextSibling(this.componentsTree, componentNode.id);
+    },
+    handleComponentNodeMoveUp (componentNode) {
+      this.componentsTree = swapWithPreviousSibling(this.componentsTree, componentNode.id);
+    },
+    handleComponentNodeDelete (componentNode) {
+      this.componentsTree = deleteComponentNodeById(this.componentsTree, componentNode.id);
+    },
+    // 异步加载与注册组件库
     async loadComponentLib() {
       this.$Loading.start();
       try {
@@ -64,17 +98,15 @@ export default {
           
           if (targetLib.library && !targetLib.libraryScriptUrl) {
             // 通过本地npm安装依赖
-            console.log('>>> 正在通过本地npm安装依赖: ', targetLib.libraryName);
-            Vue.use(targetLib.library)
+            this.$root.constructor.use(targetLib.library)
           } else if (targetLib.libraryScriptUrl) {
             // 通过远程地址安装依赖
-            console.log('>>> 正在通过远程地址安装依赖: ', targetLib.libraryName);
             const methodName = targetLib.libraryName === 'ELEMENT' ? registerElementUIDynamic : registerVueComponentLibraryDynamic;
             const lib = await methodName({
               libraryName: targetLib.libraryName,
               libraryScriptUrl: targetLib.libraryScriptUrl,
               libraryStyleUrl: targetLib.libraryStyleUrl,
-              register: Vue,
+              register: this.$root.constructor,
             });
             this.$set(targetLib, 'material', lib.material);
             this.$set(targetLib, 'schemas', lib.schemas);
@@ -82,7 +114,6 @@ export default {
             console.error(`组件库 ${targetLib.libraryName} 配置缺少 library 或 libraryScriptUrl`);
           }
         }
-        console.log('>>> 组件库列表安装完成: ', this.materialList);
         this.$Loading.finish();
         this.isLoaded = true;
       } catch (err) {
@@ -90,37 +121,52 @@ export default {
         console.error(err);
       }
     },
+
+    // 将新组件节点添加到画布
+    addComponentNodeToCanvas(newComponentNode) {
+      const activeNode = findComponentNodeById(this.componentsTree, this.activeComponentNodeId);
+      // 新节点添加到画布
+      if (activeNode) {
+        if (activeNode.categoryType === 'container') {
+          newComponentNode.parentId = activeNode.id;
+          activeNode.children.push(newComponentNode);
+        } else {
+          insertAfterSibling(this.componentsTree, activeNode.id, newComponentNode);
+        }
+      } else {
+        this.componentsTree.push(newComponentNode);
+      }
+      this.activeComponentNodeId = newComponentNode.id
+    },
+
+    // 点击组件库中的组件
     handleMaterialClick ({ libraryName, categoryIndex, componentIndex }) {
-      console.log(libraryName, categoryIndex, componentIndex)
       // 在 materialList 中找到对应的组件，并将组件信息注入 componentsTree 组件树中
       const targetLib = this.materialList.find(item => item.libraryName === libraryName)
       if (targetLib) {
-        const targetComponent = targetLib.material.categoryList[categoryIndex].children[componentIndex];
-        const targetSchema = JSON.parse(JSON.stringify(targetLib.schemas[targetComponent.type]));
+        const category = targetLib.material.categoryList[categoryIndex];
+        const component = category.children[componentIndex];
+        const schema = JSON.parse(JSON.stringify(targetLib.schemas[component.type]));
 
         const newComponentNode = {
+          ...component,
           id: generateRandomString(),
           libraryName,
           categoryIndex,
-          ...targetComponent,
-          schema: {
-            props: [...targetSchema.props],
-            style: [ ...targetSchema.style ],
-            events: [ ...targetSchema.events],
-          }
+          categoryType: category.category,
+          children: [],
+          maskStyle: {},
+          schema: {}
         };
-        this.componentsTree.push(newComponentNode);
 
-        this.activeComponentNode = newComponentNode;
+        schema.props && (newComponentNode.schema.props = [...schema.props]);
+        schema.style && (newComponentNode.schema.style = [...schema.style]);
+        schema.events && (newComponentNode.schema.events = [...schema.events]);
+
+        this.addComponentNodeToCanvas(newComponentNode);
       }
-    },
-    handleCanvasNodeClick (node) {
-      this.activeComponentNode = node;
     }
-  },
-  async created() {
-    this.loadComponentLib();
-  },
+  }
 };
 </script>
 

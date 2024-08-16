@@ -65,7 +65,7 @@ export default {
   props: {
     activeComponentNode: {
       type: Object,
-      default: () => ({})
+      default: () => null
     }
   },
   data() {
@@ -87,25 +87,18 @@ export default {
     };
   },
   methods: {
-    parseSchemeProps (props) {
-      
-    },
-    parseSchemeStyle (style) {
-      
-    },
-    parseSchemeEvents (events) {
-      
-    }
+    parseSchemeProps (props) {},
+    parseSchemeStyle (style) {},
+    parseSchemeEvents (events) {}
   },
   watch: {
-    'activeComponentNode.id': {
+    'activeComponentNode.schema': {
       handler (val) {
-        console.log('>>> activeComponentNode.id changed: ', val)
-        console.log('>>> activeComponentNode: ', this.activeComponentNode)
-        const { props, style, events } = this.activeComponentNode.schema
-        this.props = [...props]
-        this.style = [...style]
-        this.events = [...events]
+        if (!val) return
+        const { props, style, events } = val
+        props && (this.props = [...props]);
+        style && (this.style = [...style]);
+        events && (this.events = [...events]);
       },
       deep: true
     }

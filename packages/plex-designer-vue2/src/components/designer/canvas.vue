@@ -4,7 +4,11 @@
     <DynamicRenderer
       :componentsTree="componentsTree"
       :activeComponentNode="activeComponentNode"
-      @onComponentNodeClick="(item) => $emit('onComponentNodeClick', item)"/>
+      @onComponentNodeClick="$emit('onComponentNodeClick', $event)"
+      @onComponentNodeMoveDown="$emit('onComponentNodeMoveDown', $event)"
+      @onComponentNodeMoveUp="$emit('onComponentNodeMoveUp', $event)"
+      @onComponentNodeDelete="$emit('onComponentNodeDelete', $event)"
+      @setActiveNodeMaskStyle="$emit('setActiveNodeMaskStyle', $event)"/>
   </div>
 </template>
 
@@ -23,7 +27,7 @@ export default {
     },
     activeComponentNode: {
       type: Object,
-      default: () => ({})
+      default: () => null
     }
   }
 };
@@ -31,6 +35,8 @@ export default {
 
 <style lang="less" scoped>
 .designer-canvas {
+  box-sizing: border-box;
+  padding: 20px 10px;
   background: #f7f7f9;
 }
 </style>
