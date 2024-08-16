@@ -1,7 +1,7 @@
-import PlexLayoutContainer from './plex-container-layout.vue';
+import PlexContainerBase from './plex-container-base.vue';
 
-PlexLayoutContainer.install = function(Vue) {
-  Vue.component(PlexLayoutContainer.name, PlexLayoutContainer);
+PlexContainerBase.install = function(Vue) {
+  Vue.component(PlexContainerBase.name, PlexContainerBase);
 };
 
-export default PlexLayoutContainer;
+export default PlexContainerBase;

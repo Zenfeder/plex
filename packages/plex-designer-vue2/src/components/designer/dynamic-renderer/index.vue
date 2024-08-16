@@ -58,7 +58,7 @@ export default {
   watch: {
     componentsTree: {
       handler (val) {
-        console.log('>>> componentsTree changed: ', val)
+        console.log('>>> componentsTree changed: ', JSON.parse(JSON.stringify(val)))
       },
       deep: true
     }

@@ -7,6 +7,10 @@ export default {
       category: 'container',
       children: [
         {
+          label: "基础容器",
+          type: "plex-container-base",
+        },
+        {
           label: "布局容器",
           type: "plex-container-layout",
         }

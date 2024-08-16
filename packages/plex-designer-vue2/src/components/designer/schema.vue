@@ -13,16 +13,16 @@
             <div class="label">{{ item.label }}:</div>
             <template v-if="item.type === 'string'">
               <template v-if="item.options && item.options.length">
-                <Select v-model="item.value">
+                <Select class="form-item" v-model="item.value">
                   <Option v-for="option in item.options" :value="option" :key="option">{{ option }}</Option>
                 </Select>
               </template>
               <template v-else>
-                <Input v-model="item.value" />
+                <Input class="form-item" v-model="item.value" />
               </template>
             </template>
             <template v-else-if="item.type === 'number'">
-              <Input v-model="item.value" type="number"/></template>
+              <Input class="form-item" v-model="item.value" type="number"/></template>
             <template v-else-if="item.type === 'boolean'">
               <i-switch v-model="item.value" />
             </template>
@@ -34,16 +34,16 @@
             <div class="label">{{ item.label }}:</div>
             <template v-if="item.type === 'string'">
               <template v-if="item.options && item.options.length">
-                <Select v-model="item.value">
+                <Select class="form-item" v-model="item.value">
                   <Option v-for="option in item.options" :value="option" :key="option">{{ option }}</Option>
                 </Select>
               </template>
               <template v-else>
-                <Input v-model="item.value" />
+                <Input class="form-item" v-model="item.value"/>
               </template>
             </template>
             <template v-else-if="item.type === 'number'">
-              <Input v-model="item.value" type="number"/></template>
+              <Input class="form-item" v-model="item.value" type="number"/></template>
             <template v-else-if="item.type === 'boolean'">
               <i-switch v-model="item.value" />
             </template>
@@ -114,6 +114,7 @@ export default {
 </script>
 
 <style lang="less" scoped>
+@input-width: 180px;
 
 .designer-schema {
   box-sizing: border-box;
@@ -121,9 +122,13 @@ export default {
   border-left: 1px solid #f5f5f5;
   box-shadow: -2px 0 20px 0 rgba(0, 0, 0, .1);
   background: #fff;
+
   .tabs-wrapper {
     width: 100%;
     height: 100%;
+  }
+  .form-item {
+    width: @input-width;
   }
   .props-item {
     display: flex;
