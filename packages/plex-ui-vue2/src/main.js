@@ -1,4 +1,5 @@
 // 导入组件
+import PlexPage from './components/plex-page';
 import PlexButton from './components/plex-button';
 import PlexContainerBase from './components/plex-container-base';
 import PlexContainerLayout from './components/plex-container-layout';
@@ -8,6 +9,7 @@ import schemas from './schemas';
 
 // 组件列表
 const components = {
+  PlexPage,
   PlexButton,
   PlexContainerBase,
   PlexContainerLayout
@@ -27,6 +29,7 @@ if (typeof window !== 'undefined' && window.Vue) {
 
 // 命名导出组件
 export {
+  PlexPage,
   PlexButton,
   PlexContainerBase,
   PlexContainerLayout,
