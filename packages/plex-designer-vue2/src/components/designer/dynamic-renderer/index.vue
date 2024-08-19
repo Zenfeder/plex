@@ -4,13 +4,14 @@
     <div class="component-wrapper"
       v-for="(component, index) in componentsTree"
       :class="{ 'active': activeComponentNode && activeComponentNode.id === component.id }"
+      :style="component.categoryType === 'page' ? 'display:block !important; width: 100%; min-height: 100%;' : ''"
       :key="component.id"
       :ref="component.id">
       <!-- 组件蒙层 -->
       <div class="component-mask"
         :style="component.maskStyle"
         @click.stop="handleComponentNodeClick(component)">
-        <div class="component-mask-tools" v-if="component.id === activeComponentNode?.id">
+        <div class="component-mask-tools" v-if="component.id === activeComponentNode?.id && component.categoryType !== 'page'">
           <Tooltip content="下移" placement="top" v-show="index !== componentsTree.length - 1">
             <Icon type="ios-arrow-round-down" @click="handleComponentNodeMoveDown(component)"/>
           </Tooltip>
@@ -26,8 +27,8 @@
       <component
         :is="component.type"
         :ref="'component-' + component.id"
-        v-bind="handleProps(component.schema.props)"
-        :style="handleStyle(component.schema.style)">
+        v-bind="handleProps(component.schema.props || [])"
+        :style="handleStyle(component.schema.style || [])">
         <!-- 递归渲染子组件 -->
         <DynamicRenderer
           v-if="component.children && component.children.length"
@@ -140,7 +141,8 @@ export default {
     // text-align: left;
   }
   &.active>.component-mask {
-    border: 1px solid #2d8cf0;
+    // border: 1px solid #2d8cf0;
+    outline: #2d8cf0 solid 1px;
   }
   .component-mask-tools {
     position: absolute;

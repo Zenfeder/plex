@@ -2,6 +2,7 @@
 <template>
   <div class="designer-canvas">
     <DynamicRenderer
+      :style="{ height: '100%' }"
       :componentsTree="componentsTree"
       :activeComponentNode="activeComponentNode"
       @onComponentNodeClick="$emit('onComponentNodeClick', $event)"

@@ -34,7 +34,6 @@ import {
   findComponentNodeById,
   swapWithNextSibling,
   swapWithPreviousSibling,
-  insertBeforeSibling,
   insertAfterSibling,
   deleteComponentNodeById
 } from '../../utils/component-tree-tools';
@@ -70,24 +69,9 @@ export default {
   },
   async created() {
     this.loadComponentLib();
+    this.initPage();
   },
   methods: {
-    handleComponentNodeClick (componentNode) {
-      this.activeComponentNodeId = componentNode.id
-    },
-    handleSetActiveNodeMaskStyle (style) {
-      const activeNode = findComponentNodeById(this.componentsTree, this.activeComponentNodeId);
-      this.$set(activeNode, 'maskStyle', style)
-    },
-    handleComponentNodeMoveDown (componentNode) {
-      this.componentsTree = swapWithNextSibling(this.componentsTree, componentNode.id);
-    },
-    handleComponentNodeMoveUp (componentNode) {
-      this.componentsTree = swapWithPreviousSibling(this.componentsTree, componentNode.id);
-    },
-    handleComponentNodeDelete (componentNode) {
-      this.componentsTree = deleteComponentNodeById(this.componentsTree, componentNode.id);
-    },
     // 异步加载与注册组件库
     async loadComponentLib() {
       this.$Loading.start();
@@ -121,20 +105,61 @@ export default {
         console.error(err);
       }
     },
-
+    initPage() {
+      const page = {
+        id: generateRandomString(),
+        categoryType: 'page',
+        type: 'plex-page',
+        label: '页面',
+        children: [],
+        schema: {
+          style: [
+            {
+              label: '宽度',
+              key: 'width',
+              type: 'string',
+              value: '100%'
+            },
+            {
+              label: '高度',
+              key: 'height',
+              type: 'string',
+              value: '100%'
+            }
+          ]
+        }
+      }
+      // this.activeComponentNodeId = page.id;
+      this.addComponentNodeToCanvas(page);
+    },
+    handleComponentNodeClick (componentNode) {
+      this.activeComponentNodeId = componentNode.id
+    },
+    handleSetActiveNodeMaskStyle (style) {
+      const activeNode = findComponentNodeById(this.componentsTree, this.activeComponentNodeId);
+      this.$set(activeNode, 'maskStyle', style)
+    },
+    handleComponentNodeMoveDown (componentNode) {
+      this.componentsTree = swapWithNextSibling(this.componentsTree, componentNode.id);
+    },
+    handleComponentNodeMoveUp (componentNode) {
+      this.componentsTree = swapWithPreviousSibling(this.componentsTree, componentNode.id);
+    },
+    handleComponentNodeDelete (componentNode) {
+      this.componentsTree = deleteComponentNodeById(this.componentsTree, componentNode.id);
+    },
     // 将新组件节点添加到画布
     addComponentNodeToCanvas(newComponentNode) {
       const activeNode = findComponentNodeById(this.componentsTree, this.activeComponentNodeId);
-      // 新节点添加到画布
-      if (activeNode) {
-        if (activeNode.categoryType === 'container') {
+      if (!this.componentsTree.length) {
+        this.componentsTree.push(newComponentNode);
+      } else if (activeNode) {
+        if (activeNode.categoryType === 'container' || activeNode.categoryType === 'page') {
           newComponentNode.parentId = activeNode.id;
           activeNode.children.push(newComponentNode);
         } else {
           insertAfterSibling(this.componentsTree, activeNode.id, newComponentNode);
         }
-      } else {
-        this.componentsTree.push(newComponentNode);
       }
       this.activeComponentNodeId = newComponentNode.id
     },
@@ -192,9 +217,10 @@ export default {
     height: 100%;
   }
   .canvas-box {
-    height: 100%;
-    flex: 1;
     min-width: @min-width-center;
+    min-height: 100%;
+    overflow-y: auto;
+    flex: 1;
   }
   .schema-box {
     width: @width-right;
