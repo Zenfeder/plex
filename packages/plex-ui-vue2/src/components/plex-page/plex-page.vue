@@ -8,7 +8,12 @@
 <script>
 export default {
   name: 'PlexPage',
-  props: {},
+  props: {
+    title: {
+      type: String,
+      default: ''
+    }
+  },
   computed: {},
   watch: {
     title: {
@@ -22,6 +27,8 @@ export default {
 </script>
 
 <style scoped lang="less">
-.plex-page {}
+.plex-page {
+  padding: 10px;
+}
 </style>
   

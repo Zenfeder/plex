@@ -3,6 +3,17 @@ export default {
   code: 'PlexUICustom', // 每个组件库唯一值
   categoryList: [
     {
+      label: "页面",
+      category: 'page',
+      hidden: true,
+      children: [
+        {
+          label: "页面",
+          type: "plex-page",
+        }
+      ]
+    },
+    {
       label: "容器",
       category: 'container',
       children: [
@@ -10,10 +21,6 @@ export default {
           label: "基础容器",
           type: "plex-container-base",
         },
-        {
-          label: "布局容器",
-          type: "plex-container-layout",
-        }
       ]
     },
     {

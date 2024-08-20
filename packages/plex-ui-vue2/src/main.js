@@ -2,7 +2,6 @@
 import PlexPage from './components/plex-page';
 import PlexButton from './components/plex-button';
 import PlexContainerBase from './components/plex-container-base';
-import PlexContainerLayout from './components/plex-container-layout';
 
 import material from './material';
 import schemas from './schemas';
@@ -11,8 +10,7 @@ import schemas from './schemas';
 const components = {
   PlexPage,
   PlexButton,
-  PlexContainerBase,
-  PlexContainerLayout
+  PlexContainerBase
 };
 
 // 定义 install 方法
@@ -32,7 +30,6 @@ export {
   PlexPage,
   PlexButton,
   PlexContainerBase,
-  PlexContainerLayout,
   material,
   schemas,
   install
