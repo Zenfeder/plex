@@ -27,6 +27,7 @@
               <Collapse simple>
                 <Panel
                   v-for="(categoryItem, categoryIndex) in materialItem.material.categoryList"
+                  v-if="categoryItem.hidden !== true"
                   :key="categoryItem.label"
                   :name="categoryItem.label">
                   {{ categoryItem.label }}

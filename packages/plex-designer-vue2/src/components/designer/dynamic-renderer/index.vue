@@ -4,7 +4,7 @@
     <div class="component-wrapper"
       v-for="(component, index) in componentsTree"
       :class="{ 'active': activeComponentNode && activeComponentNode.id === component.id }"
-      :style="component.categoryType === 'page' ? 'display:block !important; width: 100%; min-height: 100%;' : ''"
+      :style="handleWrapperStyle(component)"
       :key="component.id"
       :ref="component.id">
       <!-- 组件蒙层 -->
@@ -12,13 +12,13 @@
         :style="component.maskStyle"
         @click.stop="handleComponentNodeClick(component)">
         <div class="component-mask-tools" v-if="component.id === activeComponentNode?.id && component.categoryType !== 'page'">
-          <Tooltip content="下移" placement="top" v-show="index !== componentsTree.length - 1">
+          <Tooltip content="下移" placement="bottom" v-show="index !== componentsTree.length - 1">
             <Icon type="ios-arrow-round-down" @click="handleComponentNodeMoveDown(component)"/>
           </Tooltip>
-          <Tooltip content="上移" placement="top" v-show="index !== 0">
+          <Tooltip content="上移" placement="bottom" v-show="index !== 0">
             <Icon type="ios-arrow-round-up" @click="handleComponentNodeMoveUp(component)"/>
           </Tooltip>
-          <Tooltip content="删除" placement="top">
+          <Tooltip content="删除" placement="bottom">
             <Icon type="ios-trash-outline" @click="handleComponentNodeDelete(component)"/>
           </Tooltip>
         </div>
@@ -28,7 +28,11 @@
         :is="component.type"
         :ref="'component-' + component.id"
         v-bind="handleProps(component.schema.props || [])"
-        :style="handleStyle(component.schema.style || [])">
+        :style="{
+          ...handleStyle(component.schema.style || []),
+          width: '100%',
+          height: '100%'
+        }">
         <!-- 递归渲染子组件 -->
         <DynamicRenderer
           v-if="component.children && component.children.length"
@@ -81,6 +85,23 @@ export default {
     handleComponentNodeDelete (componentNode) {
       this.$emit('onComponentNodeDelete', componentNode)
     },
+    handleWrapperStyle (componentNode) {
+      if (!componentNode) return {}
+      if (componentNode.categoryType === 'page') {
+        return {
+          'display': 'block !important',
+          'width': '100%',
+          'min-height': '100%'
+        }
+      } else {
+        const componentStyle = this.handleStyle(componentNode.schema.style || []);
+        return {
+          width: componentStyle.width || 'auto',
+          height: componentStyle.height || 'auto',
+          display: componentStyle.display || 'auto',
+        }
+      }
+    },
     // 处理props
     handleProps (originPropsArray) {
       if (!originPropsArray) return {}
@@ -91,6 +112,7 @@ export default {
       }, {})
     },
     handleStyle (originStyleArray) {
+      // Todo: 逻辑需要优化，比如清除颜色类、尺寸类值归零时的处理逻辑
       if (!originStyleArray) return {}
       
       return originStyleArray.reduce((obj, style) => {
@@ -108,9 +130,10 @@ export default {
         setTimeout(() => {
           const elem = this.$refs[this.activeComponentNode.id]
           if (elem) {
+            // console.log('>>> activeComponentNode.schema changed: ', elem[0])
             this.$emit('setActiveNodeMaskStyle', {
-              width: elem[0].children[1].offsetWidth + 'px',
-              height: elem[0].children[1].offsetHeight + 'px'
+              width: (elem[0].children[1].offsetWidth - 2) + 'px', // 减 2 是因为激活状态的节点蒙层上下左右各有1px的边框
+              height: (elem[0].children[1].offsetHeight - 2) + 'px'
             })
           }
         }, 0)
@@ -123,26 +146,20 @@ export default {
 </script>
 
 <style lang="less" scoped>
-.dynamic-renderer {
-  display: flex;
-  flex-direction: column; /* 强制每个元素占据一行 */
-  align-items: flex-start; /* 保持元素宽度自适应内容 */
-}
 .component-wrapper {
-  display: inline-block;
   cursor: pointer;
+  display: inline-block;
+  vertical-align: top;
   position: relative;
-  text-align: right;
   .component-mask {
-    padding-top: 20px;
     position: absolute;
     left: 0;
     top: 0;
-    // text-align: left;
   }
-  &.active>.component-mask {
-    // border: 1px solid #2d8cf0;
-    outline: #2d8cf0 solid 1px;
+  &.active {
+    &>.component-mask {
+      outline: #2d8cf0 solid 1px;
+    }
   }
   .component-mask-tools {
     position: absolute;

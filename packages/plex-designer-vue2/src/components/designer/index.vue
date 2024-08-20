@@ -68,7 +68,7 @@ export default {
     }
   },
   async created() {
-    this.loadComponentLib();
+    await this.loadComponentLib();
     this.initPage();
   },
   methods: {
@@ -106,31 +106,12 @@ export default {
       }
     },
     initPage() {
-      const page = {
-        id: generateRandomString(),
-        categoryType: 'page',
-        type: 'plex-page',
-        label: '页面',
-        children: [],
-        schema: {
-          style: [
-            {
-              label: '宽度',
-              key: 'width',
-              type: 'string',
-              value: '100%'
-            },
-            {
-              label: '高度',
-              key: 'height',
-              type: 'string',
-              value: '100%'
-            }
-          ]
-        }
-      }
-      // this.activeComponentNodeId = page.id;
-      this.addComponentNodeToCanvas(page);
+      // Todo: 待优化，这里默认 plex-ui-vue2 是系统组件库，考虑做成配置化？
+      this.handleMaterialClick({
+        libraryName: 'plex-ui-vue2',
+        categoryIndex: 0,
+        componentIndex: 0
+      })
     },
     handleComponentNodeClick (componentNode) {
       this.activeComponentNodeId = componentNode.id
@@ -220,6 +201,7 @@ export default {
     min-width: @min-width-center;
     min-height: 100%;
     overflow-y: auto;
+    scrollbar-width: none;
     flex: 1;
   }
   .schema-box {

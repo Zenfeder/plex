@@ -19,12 +19,6 @@ export default {
     return {
       // 组件库配置
       materialConfig: [
-        // 远程组件
-        {
-          libraryName: 'ELEMENT',
-          libraryScriptUrl: 'http://localhost:3000/element-ui@2.15.14/index.js',
-          libraryStyleUrl: 'http://localhost:3000/element-ui@2.15.14/index.css',
-        },
         // 本地开发自定义组件
         {
           libraryName: 'plex-ui-vue2',
@@ -32,11 +26,12 @@ export default {
           material,
           schemas
         },
-        // {
-        //   libraryName: 'plex-ui-vue2',
-        //   libraryScriptUrl: 'http://localhost:3000/plex-ui-vue2/main.200664fef5b9b358b892.umd.js',
-        //   libraryStyleUrl: '',
-        // }
+        // 远程组件
+        {
+          libraryName: 'ELEMENT',
+          libraryScriptUrl: 'http://localhost:3000/element-ui@2.15.14/index.js',
+          libraryStyleUrl: 'http://localhost:3000/element-ui@2.15.14/index.css',
+        }
       ]
     };
   }
