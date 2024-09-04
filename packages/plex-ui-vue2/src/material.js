@@ -30,6 +30,10 @@ export default {
         {
           label: "按钮",
           type: "plex-button",
+        },
+        {
+          label: "输入框",
+          type: "plex-input",
         }
       ]
     }

@@ -37,7 +37,7 @@ export default {
 <style lang="less" scoped>
 .designer-canvas {
   box-sizing: border-box;
-  padding: 20px 10px;
+  padding: 10px 5px 5px;
   background: #f7f7f9;
 }
 </style>

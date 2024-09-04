@@ -1,9 +1,15 @@
 // 属性
 const props = [
   {
+    label: '原生 href 属性',
+    type: 'string',
+    key: 'href',
+    value: ''
+  },
+  {
     label: '类型',
     type: 'string',
-    options: ['primary', 'success', 'warning', 'danger', 'info'],
+    options: ['default', 'primary', 'success', 'warning', 'danger', 'info'],
     key: 'type',
     value: 'default' // 默认值
   },
@@ -18,12 +24,6 @@ const props = [
     type: 'boolean',
     key: 'disabled',
     value: false
-  },
-  {
-    label: '原生 href 属性',
-    type: 'string',
-    key: 'href',
-    value: ''
   }
 ];
 

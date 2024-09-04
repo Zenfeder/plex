@@ -1,16 +1,10 @@
 // 样式
 const style = [
   {
-    label: '文字颜色',
-    key: 'color',
-    type: 'color',
-    value: ''
-  },
-  {
     label: '字体大小',
     key: 'fontSize',
-    type: 'number',
-    value: 14
+    type: 'string',
+    value: '14px'
   },
   {
     label: '字体粗细',
@@ -30,25 +24,25 @@ const style = [
     label: '外边距-上',
     key: 'marginTop',
     type: 'number',
-    value: 0
+    value: NaN
   },
   {
     label: '外边距-右',
     key: 'marginRight',
     type: 'number',
-    value: 0
+    value: NaN
   },
   {
     label: '外边距-下',
     key: 'marginBottom',
     type: 'number',
-    value: 0
+    value: NaN
   },
   {
     label: '外边距-左',
     key: 'marginLeft',
     type: 'number',
-    value: 0
+    value: NaN
   }
 ];
 

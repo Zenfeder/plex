@@ -49,12 +49,14 @@
           </TabPane>
         </Tabs>
       </template>
-      <!-- 大纲 -->
-      <template v-if="activeSidebarCategory === 'outline'">
-        <!-- Todo -->
-      </template>
+      
       <!-- 代码 -->
       <template v-if="activeSidebarCategory === 'code'">
+        <vue-json-pretty :data="componentsTreeShow" @node-click="handleCodeNodeClick"/>
+      </template>
+
+      <!-- 大纲 -->
+      <template v-if="activeSidebarCategory === 'outline'">
         <!-- Todo -->
       </template>
     </div>
@@ -62,8 +64,14 @@
 </template>
 
 <script>
+import VueJsonPretty from 'vue-json-pretty';
+import 'vue-json-pretty/lib/styles.css';
+
 export default {
   name: 'PdMaterial',
+  components: {
+    VueJsonPretty
+  },
   data() {
     return {
       // 侧边栏分类
@@ -72,18 +80,53 @@ export default {
         value: 'component',
         icon: 'ios-apps'
       }, {
-        label: '大纲',
-        value: 'outline',
-        icon: 'ios-map-outline'
-      }, {
         label: '代码',
         value: 'code',
         icon: 'ios-code'
+      }, {
+        label: '大纲',
+        value: 'outline',
+        icon: 'ios-map-outline'
       }],
-      activeSidebarCategory: 'component',
+      activeSidebarCategory: 'component'
     };
   },
+  computed: {
+    componentsTreeShow() {
+      function formatComponentTree (item) {
+        const node = {
+          id: item.id,
+          label: item.label,
+          type: item.type
+        }
+        if (item.schema && item.schema.props && item.schema.props.length) {
+          node.props = {};
+          for (let i = 0; i < item.schema.props.length; i++) {
+            node.props[item.schema.props[i].key] = item.schema.props[i].value
+          }
+        }
+        if (item.schema && item.schema.style && item.schema.style.length) {
+          node.style = {};
+          for (let i = 0; i < item.schema.style.length; i++) {
+            node.style[item.schema.style[i].key] = item.schema.style[i].value
+          }
+        }
+        if (item.children && item.children.length) {
+          node.children = [];
+          for (let i = 0; i < item.children.length; i++) {
+            node.children.push(formatComponentTree(item.children[i]));
+          }
+        }
+        return node;
+      }
+      return [formatComponentTree(this.componentsTree[0])];
+    }
+  },
   props: {
+    componentsTree: {
+      type: Array,
+      default: () => []
+    },
     materialList: {
       type: Array,
       default: () => []
@@ -97,6 +140,9 @@ export default {
         componentIndex
       })
       // 将组件添加到画布
+    },
+    handleCodeNodeClick (componentNode) {
+      this.$emit('onCodeNodeClick', componentNode)
     }
   }
 };
@@ -146,8 +192,9 @@ export default {
 }
 .material-content {
   flex: 1;
-  height: 100%;
-  overflow: hidden;
+  min-height: 100%;
+  overflow-y: auto;
+  scrollbar-width: thin;
   background: #fff;
   border-left: 1px solid #e6e6e8;
 }

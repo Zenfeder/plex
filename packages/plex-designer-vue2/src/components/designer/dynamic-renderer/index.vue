@@ -27,12 +27,9 @@
       <component
         :is="component.type"
         :ref="'component-' + component.id"
+        v-model="bindData[handleProps(component.schema.props || [])['v-model']]"
         v-bind="handleProps(component.schema.props || [])"
-        :style="{
-          ...handleStyle(component.schema.style || []),
-          width: '100%',
-          height: '100%'
-        }">
+        :style="handleInnerStyle(component)">
         <!-- 递归渲染子组件 -->
         <DynamicRenderer
           v-if="component.children && component.children.length"
@@ -69,6 +66,9 @@ export default {
       activeNodeMaskStyle: {
         width: '',
         height: ''
+      },
+      bindData: {
+        textValue: ''
       }
     }
   },
@@ -102,14 +102,31 @@ export default {
         }
       }
     },
+    handleInnerStyle (componentNode) {
+      if (!componentNode) return {}
+      if (componentNode.categoryType === 'container') {
+        const componentStyle = this.handleStyle(componentNode.schema.style || []);
+        return {
+          ...componentStyle,
+          width: '100%',
+          height: '100%'
+        }
+      } else {
+        const componentStyle = this.handleStyle(componentNode.schema.style || []);
+        return {
+          ...componentStyle
+        }
+      }
+    },
     // 处理props
     handleProps (originPropsArray) {
       if (!originPropsArray) return {}
       
-      return originPropsArray.reduce((obj, prop) => {
+      const res = originPropsArray.reduce((obj, prop) => {
         obj[prop.key] = prop.value;
         return obj;
       }, {})
+      return res
     },
     handleStyle (originStyleArray) {
       // Todo: 逻辑需要优化，比如清除颜色类、尺寸类值归零时的处理逻辑
@@ -130,7 +147,6 @@ export default {
         setTimeout(() => {
           const elem = this.$refs[this.activeComponentNode.id]
           if (elem) {
-            // console.log('>>> activeComponentNode.schema changed: ', elem[0])
             this.$emit('setActiveNodeMaskStyle', {
               width: (elem[0].children[1].offsetWidth - 2) + 'px', // 减 2 是因为激活状态的节点蒙层上下左右各有1px的边框
               height: (elem[0].children[1].offsetHeight - 2) + 'px'
@@ -140,6 +156,13 @@ export default {
       },
       deep: true,
       immediate: true
+    },
+    bindData: {
+      handler (val) {
+        if (!val) return
+        console.log('>>> designer bindData changed: ', val)
+      },
+      deep: true
     }
   }
 };
@@ -155,6 +178,7 @@ export default {
     position: absolute;
     left: 0;
     top: 0;
+    z-index: 1;
   }
   &.active {
     &>.component-mask {

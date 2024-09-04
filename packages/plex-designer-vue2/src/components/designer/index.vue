@@ -4,8 +4,10 @@
     <pd-toolbar/>
     <div class="designer-body" v-if="isLoaded">
       <pd-material class="material-box"
+        :componentsTree="componentsTree"
         :materialList="materialList"
-        @onComponentItemClick="handleMaterialClick"/>
+        @onComponentItemClick="handleMaterialClick"
+        @onCodeNodeClick="handleCodeNodeClick"/>
 
       <pd-canvas class="canvas-box"
         :componentsTree="componentsTree"
@@ -37,6 +39,7 @@ import {
   insertAfterSibling,
   deleteComponentNodeById
 } from '../../utils/component-tree-tools';
+import _ from 'lodash';
 
 export default {
   name: 'PlexDesigner',
@@ -115,6 +118,18 @@ export default {
     },
     handleComponentNodeClick (componentNode) {
       this.activeComponentNodeId = componentNode.id
+    },
+    handleCodeNodeClick (nodeData) {
+      const matchs = nodeData.path.match(/(children\[\d+\](?:\.children\[\d+\])*)/)
+      if (matchs) {
+        const path = matchs[0]
+        const componentNode = _.get(this.componentsTree[0], path)
+        if (componentNode.parentId && componentNode.id) {
+          this.activeComponentNodeId = componentNode.id
+        }
+      } else {
+        this.activeComponentNodeId = this.componentsTree[0].id
+      }
     },
     handleSetActiveNodeMaskStyle (style) {
       const activeNode = findComponentNodeById(this.componentsTree, this.activeComponentNodeId);

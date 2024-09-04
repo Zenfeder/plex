@@ -70,16 +70,16 @@ export default {
   },
   data() {
     return {
-      tabCategories: [{
-        label: '属性',
-        value: 'props',
-      }, {
-        label: '样式',
-        value: 'style',
-      }, {
-        label: '事件',
-        value: 'events'
-      }],
+      tabCategories: [
+        {
+          label: '属性',
+          value: 'props',
+        },
+        {
+          label: '样式',
+          value: 'style',
+        }
+      ],
       activeTab: 'props',
       props: [],
       style: [],

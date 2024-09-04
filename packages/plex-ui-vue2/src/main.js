@@ -1,7 +1,8 @@
 // 导入组件
 import PlexPage from './components/plex-page';
-import PlexButton from './components/plex-button';
 import PlexContainerBase from './components/plex-container-base';
+import PlexButton from './components/plex-button';
+import PlexInput from './components/plex-input';
 
 import material from './material';
 import schemas from './schemas';
@@ -9,8 +10,9 @@ import schemas from './schemas';
 // 组件列表
 const components = {
   PlexPage,
+  PlexContainerBase,
   PlexButton,
-  PlexContainerBase
+  PlexInput,
 };
 
 // 定义 install 方法
@@ -28,8 +30,9 @@ if (typeof window !== 'undefined' && window.Vue) {
 // 命名导出组件
 export {
   PlexPage,
-  PlexButton,
   PlexContainerBase,
+  PlexButton,
+  PlexInput,
   material,
   schemas,
   install

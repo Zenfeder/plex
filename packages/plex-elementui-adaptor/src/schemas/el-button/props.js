@@ -33,12 +33,6 @@ const props = [
     value: false
   },
   {
-    label: '是否加载中',
-    type: 'boolean',
-    key: 'loading',
-    value: false
-  },
-  {
     label: '是否禁用',
     type: 'boolean',
     key: 'disabled',

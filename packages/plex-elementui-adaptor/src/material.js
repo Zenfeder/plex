@@ -14,10 +14,6 @@ export default {
           label: "输入框",
           type: "el-input",
         },
-        {
-          label: "选择器",
-          type: "el-select",
-        }
       ]
     },
     {
