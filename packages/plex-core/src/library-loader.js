@@ -12,7 +12,7 @@ import { loadScript, loadStyle } from './resource-loader';
  * @param {boolean} [options.needWindowVue=false] - 是否需要将 Vue 构造函数赋值给 `window.Vue`。
  * @return {Promise<void>} 一个解析为加载完成的 Promise。
  */
-export default async function registerVueComponentLibraryDynamic({
+export async function registerVue2ComponentDynamic({
   libraryName,
   libraryScriptUrl,
   libraryStyleUrl,
@@ -50,6 +50,31 @@ export default async function registerVueComponentLibraryDynamic({
           }
         });
       }
+      return library;
+    } else {
+      console.error(` ${libraryName} 字段不在 window 对象中`);
+    }
+  } catch (err) {
+    console.error(` ${libraryName} 组件库脚本加载失败:`, err);
+  }
+}
+
+// 动态加载和注册Vue3组件库
+export async function registerVue3ComponentDynamic({
+  libraryName,
+  libraryScriptUrl,
+  libraryStyleUrl,
+  app
+}) {
+  try {
+    if (libraryStyleUrl) {
+      await loadStyle(libraryStyleUrl);
+    }
+    await loadScript(libraryScriptUrl);
+    const library = window[libraryName];
+    if (library && library.install && typeof library.install === 'function') {
+      // 全局注册
+      app.use(library);
       return library;
     } else {
       console.error(` ${libraryName} 字段不在 window 对象中`);

@@ -28,7 +28,7 @@
 
 <script>
 import Vue from 'vue';
-import { registerVueComponentLibraryDynamic } from 'plex-core'; 
+import { registerVue2ComponentDynamic } from 'plex-core'; 
 
 export default {
   name: 'App',
@@ -44,14 +44,14 @@ export default {
   },
   async mounted() {
     // 全局注册组件库
-    await registerVueComponentLibraryDynamic({
+    await registerVue2ComponentDynamic({
       libraryName: 'PlexUIVue2',
       libraryScriptUrl: 'http://localhost:3000/js/plex-ui-vue2.c7bce9211df9b0ef9457.umd.js',
       register: Vue, // 全局注册组件库
     });
 
     // 局部注册组件库
-    await registerVueComponentLibraryDynamic({
+    await registerVue2ComponentDynamic({
       libraryName: 'ELEMENT',
       libraryScriptUrl: 'https://unpkg.com/element-ui/lib/index.js',
       libraryStyleUrl: 'https://unpkg.com/element-ui/lib/theme-chalk/index.css',

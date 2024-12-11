@@ -1,4 +1,4 @@
-import registerVueComponentLibraryDynamic from './library-loader';
+import { registerVue2ComponentDynamic, registerVue3ComponentDynamic } from './library-loader';
 import { loadScript, loadScriptBatch, loadScriptsInOrder, loadStyle } from './resource-loader';
 
 export {
@@ -6,5 +6,6 @@ export {
   loadScriptBatch,
   loadScriptsInOrder,
   loadStyle,
-  registerVueComponentLibraryDynamic
+  registerVue2ComponentDynamic,
+  registerVue3ComponentDynamic
 };
