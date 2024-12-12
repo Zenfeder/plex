@@ -1,5 +1,5 @@
 <template>
-  <div class="designer-material">
+  <div class="design-material">
     <div class="material-sidebar">
       <div class="sidebar-item"
         v-for="sidebarType in sidebarCategories"
@@ -58,8 +58,20 @@
 
       <!-- 大纲 -->
       <template v-if="activeSidebarCategory === 'outline'">
-        <!-- Todo -->
-        大纲
+        <el-tree
+          style="max-width: 600px"
+          :data="componentsTree"
+          :props="outlineTreeProps"
+          :default-expand-all="true"
+          :expand-on-click-node="false"
+          :highlight-current="true"
+          :node-key="'id'"
+          :current-node-key="activeComponentNode.id"
+          draggable
+          :allow-drop="allowDrop"
+          :allow-drag="allowDrag"
+          @node-click="handleOutlineNodeClick"
+        />
       </template>
     </div>
   </div>
@@ -93,6 +105,10 @@ const props = defineProps({
 		type: Array,
 		default: () => []
 	},
+  activeComponentNode: {
+    type: Object,
+    default: () => {}
+  },
 	materialList: {
 		type: Array,
 		default: () => []
@@ -130,8 +146,12 @@ const componentsTreeShow = computed(() => {
 	return [formatComponentTree(props.componentsTree[0])];
 })
 
-const emit = defineEmits(['onComponentItemClick', 'onCodeNodeClick'])
+const emit = defineEmits(['onComponentItemClick', 'onCodeNodeClick', 'onOutlineNodeClick']);
 
+const outlineTreeProps = {
+  children: 'children',
+  label: 'label',
+}
 
 // Methods
 const handleComponentItemClick = function({ libraryName, categoryIndex, componentIndex }) {
@@ -145,6 +165,23 @@ const handleComponentItemClick = function({ libraryName, categoryIndex, componen
 
 const handleCodeNodeClick = function(componentNode) {
 	emit('onCodeNodeClick', componentNode)
+}
+const handleOutlineNodeClick = function(componentNode) {
+  emit('onOutlineNodeClick', componentNode)
+}
+const allowDrop = (draggingNode, dropNode, type) => {
+  const { categoryType } = dropNode.data
+  if (categoryType === 'page') {
+    return type === 'inner'
+  } else if (categoryType === 'container') {
+    return true
+  } else {
+    return type !== 'inner'
+  }
+}
+const allowDrag = (draggingNode) => {
+  // 根节点不允许拖拽
+  return draggingNode.data.parentId
 }
 
 watch(
@@ -161,7 +198,7 @@ watch(
 </script>
 
 <style lang="less" scoped>
-.designer-material {
+.design-material {
   box-sizing: border-box;
   height: 100%;
   width: 100%;

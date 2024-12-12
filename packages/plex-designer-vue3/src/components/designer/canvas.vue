@@ -1,7 +1,7 @@
 <template>
-  <div class="designer-canvas">
+  <div class="design-canvas">
     <template v-if="!refresh">
-      <DynamicRenderer
+      <DesignRenderer
         v-for="(component, index) in componentsTree"
         :key="component.id"
         :component="component"
@@ -21,7 +21,7 @@
 <script setup>
 import { ref } from 'vue';
 import _ from 'lodash';
-import DynamicRenderer from './dynamic-renderer';
+import DesignRenderer from './design-renderer';
 
 // Props
 const props = defineProps({
@@ -46,7 +46,7 @@ window.onresize = _.debounce(() => {
 </script>
 
 <style lang="less" scoped>
-.designer-canvas {
+.design-canvas {
   box-sizing: border-box;
   padding: 20px 5px 5px 5px;
   background: #f7f7f9;

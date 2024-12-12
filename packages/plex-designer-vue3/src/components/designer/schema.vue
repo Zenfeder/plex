@@ -1,6 +1,6 @@
 <!-- 右侧组件配置栏 -->
 <template>
-  <div class="designer-schema">
+  <div class="design-schema">
     <el-tabs class="tabs-wrapper" v-model="activeTab">
       <el-tab-pane
         v-for="tab in tabCategories"
@@ -112,7 +112,7 @@ const parseSchemeEvents = function (_events) {}
 <style lang="less" scoped>
 @input-width: 180px;
 
-.designer-schema {
+.design-schema {
   box-sizing: border-box;
   padding: 10px 0;
   border-left: 1px solid #f5f5f5;

@@ -1,13 +1,16 @@
 <!-- 设计器入口 -->
 <template>
-  <div class="designer-container">
-    <pd-toolbar/>
-    <div class="designer-body" v-if="isLoaded">
+  <div class="design-container">
+    <pd-toolbar
+      @onPreview="handlePreview"/>
+    <div class="design-body" v-if="isLoaded">
       <pd-material class="material-box"
-        :componentsTree="componentsTree"
         :materialList="materialList"
+        :componentsTree="componentsTree"
+        :activeComponentNode="activeComponentNode"
         @onComponentItemClick="handleMaterialClick"
-        @onCodeNodeClick="handleCodeNodeClick"/>
+        @onCodeNodeClick="handleCodeNodeClick"
+        @onOutlineNodeClick="handleOutlineNodeClick"/>
 
       <pd-canvas class="canvas-box"
         :componentsTree="componentsTree"
@@ -43,6 +46,10 @@ import {
   deleteComponentNodeById
 } from '../../utils/component-tree-tools';
 import _ from 'lodash';
+
+const emit = defineEmits([
+  'onPreview'
+]);
 
 const instance = getCurrentInstance();
 let isLoaded = ref(false);
@@ -100,6 +107,9 @@ const handleCodeNodeClick = function (nodeData) {
     activeComponentNodeId.value = componentsTree.value[0].id
   }
 }
+const handleOutlineNodeClick = function (nodeData) {
+  activeComponentNodeId.value = nodeData.id
+}
 const handleSetActiveNodeMaskStyle = function (style) {
   const activeNode = findComponentNodeById(componentsTree.value, activeComponentNodeId.value);
   activeNode.maskStyle = style
@@ -124,6 +134,7 @@ const addComponentNodeToCanvas = function (newComponentNode) {
       newComponentNode.parentId = activeNode.id;
       activeNode.children.push(newComponentNode);
     } else {
+      newComponentNode.parentId = activeNode.parentId;
       insertAfterSibling(componentsTree.value, activeNode.id, newComponentNode);
     }
   }
@@ -158,6 +169,10 @@ const handleMaterialClick = function ({ libraryName, categoryIndex, componentInd
   }
 }
 
+const handlePreview = function () {
+  emit('onPreview', componentsTree.value);
+}
+
 const initPage = function () {
   // Todo: 待优化，这里默认 plex-ui-vue2 是系统组件库，考虑做成配置化？
   handleMaterialClick({
@@ -179,12 +194,12 @@ onMounted(async() => {
 @width-right: 320px;
 @min-width-center: 600px;
 
-.designer-container {
+.design-container {
   height: 100vh;
   overflow: hidden;
 }
 
-.designer-body {
+.design-body {
   height: calc(100vh - @height-header);
   display: flex;
   flex-direction: row;

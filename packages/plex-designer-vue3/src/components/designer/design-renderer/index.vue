@@ -1,5 +1,5 @@
 <template>
-  <div class="dynamic-renderer"
+  <div class="design-renderer"
     ref="elementRef"
     :style="getWrapperStyle(component)">
     <!-- 组件蒙层 -->
@@ -12,19 +12,17 @@
       @maskClick="handleComponentNodeClick"
       @moveUp="handleComponentNodeMoveUp"
       @moveDown="handleComponentNodeMoveDown"
-      @delete="handleComponentNodeDelete"/>
-   
+      @delete="handleComponentNodeDelete"
+    />
     <!-- 渲染组件 -->
     <component
       :is="component.type"
-      :ref="'component-' + component.id"
-      v-model="bindData[getBindModelKey(component.schema.props)]"
-      v-bind="normalizeProps(component.schema.props)"
       :style="getComponentStyle(component)"
+      v-bind="normalizeProps(component.schema.props)"
     >
       <!-- 递归渲染子组件 -->
       <template v-if="component.children?.length">
-        <DynamicRenderer
+        <DesignRenderer
           v-for="($component, $index) in component.children"
           :key="$component.id"
           :index="$index"
@@ -36,22 +34,21 @@
           @onComponentNodeMoveUp="$emit('onComponentNodeMoveUp', $event)"
           @onComponentNodeDelete="$emit('onComponentNodeDelete', $event)"
           @setActiveNodeMaskStyle="$emit('setActiveNodeMaskStyle', $event)"
-        /></template>
+        />
+      </template>
       <template v-else-if="component.label">{{ component.label }}</template>
     </component>
   </div>
 </template>
 
 <script setup>
-import { reactive, ref, watch } from 'vue';
+import { ref, watch } from 'vue';
 import ComponentMask from './component-mask.vue';
 
 defineOptions({
-  name: 'DynamicRenderer'
+  name: 'DesignRenderer'
 });
 
-// 数据
-const bindData = reactive({});
 const elementRef = ref();
 
 // Props
@@ -141,11 +138,6 @@ const getComponentStyle = (component) => {
   return style;
 };
 
-const getBindModelKey = (propsArray) => {
-  const props = normalizeProps(propsArray);
-  return props['v-model'] || '';
-};
-
 // 监听 activeComponentNode.schema
 watch(
   () => props.activeComponentNode?.schema,
@@ -168,22 +160,11 @@ watch(
 </script>
 
 <style lang="less" scoped>
-.dynamic-renderer {
+.design-renderer {
   cursor: pointer;
   display: inline-block;
   vertical-align: top;
   position: relative;
   min-width: 60px;
-
-  .component-mask {
-    position: absolute;
-    left: 0;
-    top: 0;
-    z-index: 1;
-  }
-
-  &.active > .component-mask {
-    outline: #2d8cf0 solid 1px;
-  }
 }
 </style>

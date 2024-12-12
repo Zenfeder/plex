@@ -1,9 +1,11 @@
 <!-- 顶部工具栏 -->
 <template>
-  <div class="designer-toolbar">
+  <div class="design-toolbar">
     <div class="toolbar-left">Plex Designer3</div>
     <div class="toolbar-center"></div>
-    <div class="toolbar-right"></div>
+    <div class="toolbar-right">
+      <el-button type="primary" size="small" @click="$emit('onPreview')">预览</el-button>
+    </div>
   </div>
 </template>
 
@@ -19,7 +21,7 @@ defineOptions({
 @width-right: 260px;
 @min-width-center: 600px;
 
-.designer-toolbar {
+.design-toolbar {
   box-sizing: border-box;
   height: @height-header;
   display: flex;
