@@ -1,18 +1,6 @@
 // 样式
 const style = [
   {
-    label: '宽度',
-    key: 'width',
-    type: 'string',
-    value: '100%'
-  },
-  {
-    label: '高度',
-    key: 'height',
-    type: 'string',
-    value: '100%'
-  },
-  {
     label: '文字颜色',
     key: 'color',
     type: 'color',

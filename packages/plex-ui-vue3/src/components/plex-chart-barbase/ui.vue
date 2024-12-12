@@ -3,7 +3,7 @@
 </template>
 
 <script setup>
-import { defineProps, watch, reactive, onMounted } from 'vue';
+import { defineProps, watch, reactive, onMounted, nextTick } from 'vue';
 import { generateRandomString } from '../../utils/common';
 
 import * as echarts from 'echarts/core';
@@ -41,7 +41,9 @@ watch(
   { deep: true, immediate: true }
 );
 
-onMounted(() => {
+onMounted(async () => {
+  await nextTick();
+
   chartDom = document.getElementById(_id);
   myChart = echarts.init(chartDom);
   
