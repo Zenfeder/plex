@@ -73,19 +73,17 @@
 </template>
 
 <script setup>
-import { computed, ref, watch } from 'vue';
+import { computed, ref, watch, inject } from 'vue';
 
 // Props
 const props = defineProps({
 	activeComponentNode: {
 		type: Object,
 		default: () => null
-	},
-  dataModelList: {
-    type: Array,
-    default: () => []
-  }
+	}
 });
+
+const dataModelList = inject('dataModelList');
 
 const emit = defineEmits([
   'onPropsChange',
@@ -151,7 +149,7 @@ function transformToTreeSelect(dataModel) {
 }
 
 const dataModelTree = computed(() => {
-  return transformToTreeSelect(props.dataModelList)
+  return transformToTreeSelect(dataModelList.value)
 })
 
 // Watch

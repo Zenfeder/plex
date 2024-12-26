@@ -117,14 +117,14 @@ const findBindDataModel = () => {
   const dataModelId = dataModelPath.split('.')[0];
   const dataModelFieldType = dataModelPath.split('.')[1];
   const dataModelFieldPath = dataModelPath.split('.').slice(2).join('.');
-  const dataModel = dataModelList.find(item => item.id === dataModelId);
+  const dataModel = dataModelList.value.find(item => item.id === dataModelId);
   if (!dataModel) return {};
   const { url, method } = dataModel;
   return { url, method, dataModelId, dataModelFieldType, dataModelFieldPath };
 }
 
 onMounted(async () => {
-  if (dataModelList.length) {
+  if (dataModelList.value.length) {
     for (const key in normalizeProps.value) {
       // 字段动态绑定
       if (key === 'field') {

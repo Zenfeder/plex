@@ -1,7 +1,6 @@
 <template>
   <Designer
     :materialConfig="materialConfig"
-    :dataModelList="dataModelList"
     @onPreview="handlePreview"
     @onSave="handleSave"
     @onSetDataModel="dialogDataModelVisible = true"/>
@@ -14,9 +13,7 @@
     :fullscreen="true"
     @close="handlePreviewClose"
   >
-    <Preview
-      :componentsTree="componentsTree"
-      :dataModelList="dataModelList" />
+    <Preview :componentsTree="componentsTree"/>
   </el-dialog>
 
   <!-- 数据模型配置弹窗 -->
@@ -25,15 +22,12 @@
     title="数据模型配置"
     :fullscreen="true"
   >
-      <DataModelConfig
-        :initData="dataModelList"
-        @onDataModelChange="handleDataModelChange"
-      />
+      <DataModelConfig />
   </el-dialog>
 </template>
 
 <script setup>
-import { ref, reactive, onMounted, provide } from 'vue'
+import { ref, reactive, onMounted, provide, readonly } from 'vue'
 import Designer from './components/designer';
 import Preview from './components/preview';
 import DataModelConfig from './components/data-model-config';
@@ -45,7 +39,7 @@ const componentsTree = ref({});
 
 // 全局数据域管理
 const dataModelList = ref([]);
-
+provide('dataModelList', dataModelList);
 
 defineOptions({
   name: 'PlexDesigner'
@@ -76,17 +70,10 @@ const handleSave = (data) => {
   emit('onSave', componentsTree.value);
 }
 
-const handleDataModelChange = (data) => {
-  dataModelList.value = data;
-  provide('dataModelList', data);
-  sessionStorage.setItem('plex-data-model', JSON.stringify(data));
-}
-
 onMounted(() => {
   const data = JSON.parse(sessionStorage.getItem('plex-data-model'));
   if (data) {
     dataModelList.value = data;
-    provide('dataModelList', data);
   }
 })
 </script>

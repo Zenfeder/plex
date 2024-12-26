@@ -81,12 +81,14 @@
 </template>
 
 <script setup>
-import { reactive, ref, watch, computed } from 'vue';
+import { reactive, ref, watch, computed, inject } from 'vue';
 import { ElMessage } from 'element-plus'
 import { generateRandomString } from '../../utils/common';
 import DataModelConfig from './DataModelConfig.vue';
 
 const emit = defineEmits(['onDataModelChange'])
+
+const dataModelList = inject('dataModelList');
 
 const props = defineProps({
   initData: {
@@ -106,7 +108,6 @@ const dataModelForm = reactive({
   response: []
 })
 
-const dataModelList = ref([]) // 数据域
 const dialogAddVisible = ref(false)
 const dialogMode = ref('add')
 const dialogTitle = computed(() => {
@@ -198,21 +199,20 @@ const handleDataModelSubmit = () => {
 
   ElMessage({ message: dialogMode.value === 'add' ? '添加成功' : '编辑成功', type: 'success' })
 
-  emit('onDataModelChange', JSON.parse(JSON.stringify(dataModelList.value)))
+  setDataModelToStorage(dataModelList.value)
+  emit('onDataModelChange', dataModelList.value)
 }
 
 // 删除
 const handleDeleteDataModel = (row) => {
   dataModelList.value = dataModelList.value.filter(item => item.id !== row.id)
-  emit('onDataModelChange', JSON.parse(JSON.stringify(dataModelList.value)))
+  setDataModelToStorage(dataModelList.value)
+  emit('onDataModelChange', dataModelList.value)
 }
 
-watch(
-  () => props.initData, () => {
-    dataModelList.value = props.initData || []
-  },
-  { immediate: true, deep: true }
-)
+const setDataModelToStorage = (data) => {
+  sessionStorage.setItem('plex-data-model', JSON.stringify(data));
+}
 </script>
 
 <style scoped lang="less">

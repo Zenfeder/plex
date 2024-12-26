@@ -25,7 +25,6 @@
 
       <pd-schema class="schema-box"
         :activeComponentNode="activeComponentNode"
-        :dataModelList="dataModelList"
         @onPropsChange="handlePropsChange"/>
     </div>
   </div>
@@ -34,10 +33,6 @@
 <script setup>
 const props = defineProps({
   materialConfig: {
-    type: Array,
-    default: () => []
-  },
-  dataModelList: {
     type: Array,
     default: () => []
   }
