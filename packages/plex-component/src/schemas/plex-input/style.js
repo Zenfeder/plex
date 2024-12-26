@@ -42,20 +42,6 @@ const style = [
     key: 'fontSize',
     type: 'number',
     value: 14
-  },
-  {
-    label: '字体粗细',
-    key: 'fontWeight',
-    type: 'string',
-    options: ['normal', 'bold', 'bolder', 'lighter', '100', '200', '300', '400', '500', '600', '700', '800', '900'],
-    value: 'normal'
-  },
-  {
-    label: '字体样式',
-    key: 'fontStyle',
-    type: 'string',
-    options: ['normal', 'italic', 'oblique'],
-    value: 'normal'
   }
 ];
 

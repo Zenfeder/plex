@@ -2,7 +2,9 @@
 <template>
   <div class="design-container">
     <pd-toolbar
-      @onPreview="handlePreview"/>
+      @onSetDataModel="handleSetDataModel"
+      @onPreview="handlePreview"
+      @onSave="handleSave"/>
     <div class="design-body" v-if="isLoaded">
       <pd-material class="material-box"
         :materialList="materialList"
@@ -21,14 +23,24 @@
         @onComponentNodeDelete="handleComponentNodeDelete"
         @setActiveNodeMaskStyle="handleSetActiveNodeMaskStyle"/>
 
-      <pd-schema class="schema-box" :activeComponentNode="activeComponentNode"/>
+      <pd-schema class="schema-box"
+        :activeComponentNode="activeComponentNode"
+        :dataModelList="dataModelList"
+        @onPropsChange="handlePropsChange"/>
     </div>
   </div>
 </template>
 
 <script setup>
 const props = defineProps({
-  materialConfig: Array
+  materialConfig: {
+    type: Array,
+    default: () => []
+  },
+  dataModelList: {
+    type: Array,
+    default: () => []
+  }
 })
 import { getCurrentInstance, onMounted, ref, computed } from 'vue';
 import { registerVue3ComponentDynamic } from 'plex-core';
@@ -48,7 +60,10 @@ import {
 import _ from 'lodash';
 
 const emit = defineEmits([
-  'onPreview'
+  'onPropsChange',
+  'onPreview',
+  'onSave',
+  'onSetDataModel'
 ]);
 
 const instance = getCurrentInstance();
@@ -171,6 +186,17 @@ const handleMaterialClick = function ({ libraryName, categoryIndex, componentInd
 
 const handlePreview = function () {
   emit('onPreview', componentsTree.value);
+}
+const handleSave = function () {
+  emit('onSave', componentsTree.value);
+}
+
+const handlePropsChange = function (activeComponent, newProps) {
+  emit('onPropsChange', activeComponent, newProps);
+}
+
+const handleSetDataModel = function (data) {
+  emit('onSetDataModel', data);
 }
 
 const initPage = function () {

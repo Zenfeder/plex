@@ -36,21 +36,32 @@
         <template v-if="activeTab === 'props'">
           <div class="props-item" v-for="item in $props" :key="item.key">
             <div class="label">{{ item.label }}:</div>
-            <template v-if="item.type === 'string'">
-              <template v-if="item.options && item.options.length">
-                <el-select class="form-item" v-model="item.value">
-                  <el-option v-for="option in item.options" :value="option" :key="option">{{ option }}</el-option>
-                </el-select>
-              </template>
-              <template v-else>
-                <el-input class="form-item" v-model="item.value" />
-              </template>
+            <template v-if="item.key === 'dataModel'">
+              <el-tree-select
+                class="form-item"
+                v-model="item.value"
+                :data="dataModelTree"
+                :render-after-expand="false"
+                placement="left-start"
+              ></el-tree-select>
             </template>
-            <template v-else-if="item.type === 'number'">
-              <el-input class="form-item" v-model="item.value" type="number"/>
-            </template>
-            <template v-else-if="item.type === 'boolean'">
-              <el-switch v-model="item.value" />
+            <template v-else>
+              <template v-if="item.type === 'string'">
+                <template v-if="item.options && item.options.length">
+                  <el-select class="form-item" v-model="item.value">
+                    <el-option v-for="option in item.options" :value="option" :key="option">{{ option }}</el-option>
+                  </el-select>
+                </template>
+                <template v-else>
+                  <el-input class="form-item" v-model="item.value" />
+                </template>
+              </template>
+              <template v-else-if="item.type === 'number'">
+                <el-input class="form-item" v-model="item.value" type="number"/>
+              </template>
+              <template v-else-if="item.type === 'boolean'">
+                <el-switch v-model="item.value" />
+              </template>
             </template>
           </div>
         </template>
@@ -62,15 +73,23 @@
 </template>
 
 <script setup>
-import { reactive, ref, watch } from 'vue';
+import { computed, ref, watch } from 'vue';
 
 // Props
 const props = defineProps({
 	activeComponentNode: {
 		type: Object,
 		default: () => null
-	}
+	},
+  dataModelList: {
+    type: Array,
+    default: () => []
+  }
 });
+
+const emit = defineEmits([
+  'onPropsChange',
+]);
 
 const tabCategories = ref([
   {
@@ -80,6 +99,10 @@ const tabCategories = ref([
   {
     label: '属性',
     value: 'props',
+  },
+  {
+    label: '事件',
+    value: 'events',
   }
 ])
 
@@ -88,25 +111,84 @@ const $style = ref([])
 const $events = ref([])
 const $props = ref([])
 
+function transformToTreeSelect(dataModel) {
+  // 递归转换函数
+  function transformFields(fields, prefix) {
+    if (!fields) return [];
+    return fields.map((field) => {
+      const node = {
+        value: `${prefix}.${field.name}`,
+        label: field.name,
+      };
+      if (field.children && field.children.length > 0 && field.type === "object") {
+        node.children = transformFields(field.children, node.value);
+      }
+      return node;
+    });
+  }
+
+  // 主转换逻辑
+  return dataModel.map((item) => {
+    const rootNode = {
+      value: item.id,
+      label: item.name,
+      children: [],
+    };
+
+    // 将 query, body, response 转换为树结构
+    ["query", "body", "response"].forEach((key) => {
+      if (item[key] && item[key].length > 0) {
+        rootNode.children.push({
+          value: `${item.id}.${key}`,
+          label: key,
+          children: transformFields(item[key], `${item.id}.${key}`),
+        });
+      }
+    });
+
+    return rootNode;
+  });
+}
+
+const dataModelTree = computed(() => {
+  return transformToTreeSelect(props.dataModelList)
+})
+
 // Watch
 watch(
   () => props.activeComponentNode?.schema,
-  (val) => {
-    if (!val) return
-      const { props: _props, style: _style, events: _events } = val
-      _props && ($props.value = [..._props]);
-      _style && ($style.value = [..._style]);
-      _events && ($events.value = [..._events]);
-    },
+  (newVal) => {
+    // newVal 和 oldVal 值一直是一样的，因为他们是同一个对象，这是 Vue 设计缺陷
+    if (!newVal) return
+    if (newVal?.props) {
+      $props.value = [...newVal?.props]
+      emitSchemeProps(newVal?.props)
+    }
+    if (newVal?.style) {
+      $style.value = [...newVal?.style]
+      emitSchemeStyle(newVal?.style)
+    }
+    if (newVal?.events) {
+      $events.value = [...newVal?.events]
+      emitSchemeEvents(newVal?.events)
+    }
+  },
   {
     deep: true,
     immediate: true
   }
 )
 
-const parseSchemeProps =  function (_props) {}
-const parseSchemeStyle = function (_style) {}
-const parseSchemeEvents = function (_events) {}
+const emitSchemeProps =  function (newVal) {
+  if (!newVal || !newVal.length) return
+  const newProps = newVal.reduce((acc, prop) => {
+    acc[prop.key] = prop.value;
+    return acc;
+  })
+  emit('onPropsChange', props.activeComponentNode, newProps)
+}
+const emitSchemeStyle = function (_style) {}
+const emitSchemeEvents = function (_events) {}
 </script>
 
 <style lang="less" scoped>

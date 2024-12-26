@@ -8,19 +8,29 @@ const props = [
     value: 'text' // 默认值
   },
   {
+    label: '标签',
+    type: 'string',
+    key: 'label',
+    value: '字段标签'
+  },
+  {
     label: '占位',
     type: 'string',
     key: 'placeholder',
     value: '请输入内容'
   },
   {
-    label: '绑定字段',
+    label: '绑定字段名',
     type: 'string',
-    key: 'v-model',
-    value: 'textValue',
-    options: ['textValue', 'numberValue'], // 这里在渲染到页面上之后，需要根据接口获取的值进行赋值
-    required: true
+    key: 'field',
+    value: ''
   },
+  {
+    label: '绑定数据模型',
+    type: 'string',
+    key: 'dataModel',
+    value: ''
+  }
 ];
 
 export default props;

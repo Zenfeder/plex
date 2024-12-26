@@ -4,6 +4,7 @@
       v-for="component in componentsTree"
       :key="component.id"
       :component="component"
+      :dataModelList="dataModelList"
       :style="{ 'width': '100%', 'min-height': '100%' }"/>
   </div>
 </template>
@@ -18,7 +19,11 @@ const props = defineProps({
 	componentsTree: {
 		type: Array,
 		default: () => []
-	}
+	},
+  dataModelList: {
+    type: Array,
+		default: () => []
+  }
 });
 
 // 解决浏览器窗口大小变化，画布宽度不更新问题

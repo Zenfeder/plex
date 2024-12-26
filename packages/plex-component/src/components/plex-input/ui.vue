@@ -1,59 +1,66 @@
 <template>
-  <input class="plex-input"
-    :value="showValue"
-    :type="type"
-    :placeholder="placeholder"
-    @input="handleChange"/>
+  <div class="form-item">
+    <label>{{ label }}</label>
+    <input v-model="value"
+      :placeholder="placeholder"
+      :type="type"
+    />
+  </div>
 </template>
 
-<script>
-export default {
-  name: 'PlexInput',
-  model: {
-    event: 'input'
+<script setup>
+import { computed } from 'vue';
+
+defineOptions({
+  name: 'PlexInput'
+})
+
+const props = defineProps({
+  modelValue: {
+    type: [String, Number],
+    default: ''
   },
-  props: {
-    value: {
-      type: String,
-      default: ''
-    },
-    type: {
-      type: String,
-      default: 'text',
-    },
-    placeholder: {
-      type: String,
-      default: ''
-    }
+  label: {
+    type: String,
+    default: ''
   },
-  computed: {},
-  data() {
-    return {
-      showValue: ''
-    };
+  placeholder: {
+    type: String,
+    default: ''
   },
-  watch: {
-    value: {
-      handler(newVal) {
-        this.showValue = newVal
-        console.log('>>> plex-input value: ', newVal)
-      },
-      immediate: true
-    }
-  },
-  methods: {
-    handleChange(event) {
-      this.showValue = event.target.value
-      this.$emit('input', this.showValue)
-      console.log('>>> plex-input showValue: ', this.showValue)
-    }
-  },
-}
+  type: {
+    type: String,
+    default: 'text'
+  }
+});
+
+const emit = defineEmits([ 'update:modelValue', 'field-change' ]);
+
+// 双向绑定逻辑
+const value = computed({
+  get: () => props.modelValue,
+  set: (val) => {
+    emit('update:modelValue', val);
+    // emit('field-change', { field: props.field, value: val });
+  }
+});
 </script>
 
 <style scoped lang="less">
-.plex-input {
-  width: 100%;
-  height: 36px;
+.form-item {
+  margin-bottom: 16px;
+  label {
+    display: block;
+    margin-bottom: 4px;
+    font-weight: bold;
+  }
+  input {
+    box-sizing: border-box;
+    width: 100%;
+    padding: 8px;
+    font-size: 14px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+  }
 }
 </style>

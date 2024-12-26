@@ -1,12 +1,13 @@
 <template>
   <div class="preview-renderer"
     ref="elementRef"
-    :style="getWrapperStyle(component)">
+    :style="wrapperStyle">
     <!-- 渲染组件 -->
     <component
       :is="component.type"
-      :style="getComponentStyle(component)"
-      v-bind="normalizeProps(component.schema.props)"
+      :style="componentStyle"
+      v-bind="normalizeProps"
+      v-model="dataBind[normalizeProps.field]"
     >
       <!-- 递归渲染子组件 -->
       <template v-if="component.children?.length">
@@ -21,7 +22,9 @@
 </template>
 
 <script setup>
-import { reactive, ref, watch } from 'vue';
+import { reactive, ref, watch, computed, onMounted, inject } from 'vue';
+import axios from 'axios';
+import _ from 'lodash';
 
 defineOptions({
   name: 'PreviewRenderer'
@@ -57,37 +60,30 @@ const emit = defineEmits([
   'setActiveNodeMaskStyle',
 ]);
 
-// 方法
-
-const normalizeProps = (propsArray) => {
-  if (!propsArray) return {};
-  return propsArray.reduce((acc, prop) => {
+// 把 component.schema.props 从数组转换成对象
+const normalizeProps = computed(() => {
+  if (!props.component?.schema?.props) return {};
+  return props.component.schema.props.reduce((acc, prop) => {
     acc[prop.key] = prop.value;
     return acc;
   }, {});
-};
+})
 
-const normalizeStyle = (styleArray) => {
-  if (!styleArray) return {};
-  return styleArray.reduce((acc, style) => {
+// 把 component.schema.style 从数组转换成对象
+const normalizeStyle = computed(() => {
+  if (!props.component?.schema?.style) return {};
+  return props.component.schema.style.reduce((acc, style) => {
     if (style.value !== undefined && style.value !== null) {
       acc[style.key] = isNaN(style.value) ? style.value : `${style.value}px`;
     }
     return acc;
   }, {});
-};
+})
 
-const getWrapperStyle = (component) => {
-  if (!component) return {};
-  if (component.categoryType === 'page') {
-    return { display: 'block', width: '100%', minHeight: '100%' };
-  }
-  return normalizeStyle(component.schema?.style || []);
-};
-
-const getComponentStyle = (component) => {
-  if (!component) return {};
-  const style = normalizeStyle(component.schema?.style || []);
+const componentStyle = computed(() => {
+  if (!props.component) return {};
+  const style = normalizeStyle.value;
+  // 处理百分比
   if (style.width?.includes('%')) {
     style.width = '100%';
   }
@@ -95,7 +91,57 @@ const getComponentStyle = (component) => {
     style.height = '100%';
   }
   return style;
-};
+})
+
+const wrapperStyle = computed(() => { 
+  if (!props.component) return {};
+  if (props.component.categoryType === 'page') {
+    return { display: 'block', width: '100%', minHeight: '100%' };
+  }
+  return { ...normalizeStyle.value };
+})
+const dataModelList = inject('dataModelList');
+const dataBind = reactive({});
+
+const fetchApi = async (url, method, query, body) => {
+  try {
+    const response = await axios({ method, url });
+    return response.data;
+  } catch (error) {
+    console.error(error);
+  }
+}
+
+const findBindDataModel = () => {
+  const dataModelPath = normalizeProps.value.dataModel;
+  const dataModelId = dataModelPath.split('.')[0];
+  const dataModelFieldType = dataModelPath.split('.')[1];
+  const dataModelFieldPath = dataModelPath.split('.').slice(2).join('.');
+  const dataModel = dataModelList.find(item => item.id === dataModelId);
+  if (!dataModel) return {};
+  const { url, method } = dataModel;
+  return { url, method, dataModelId, dataModelFieldType, dataModelFieldPath };
+}
+
+onMounted(async () => {
+  if (dataModelList.length) {
+    for (const key in normalizeProps.value) {
+      // 字段动态绑定
+      if (key === 'field') {
+        // dataBind[normalizeProps.value[key]] = '';
+      }
+      // 数据模型动态绑定
+      if (key === 'dataModel') {
+        const { url, method, dataModelFieldType, dataModelFieldPath } = findBindDataModel();
+        const res = await fetchApi(url, method)
+        if (!res) return;
+        if (dataModelFieldType === 'response') {
+          dataBind[normalizeProps.value['field']] = _.get(res, dataModelFieldPath);
+        }
+      }
+    }
+  }
+})
 
 // 监听 activeComponentNode.schema
 watch(

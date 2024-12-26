@@ -1,7 +1,7 @@
 <template>
   <div class="design-renderer"
     ref="elementRef"
-    :style="getWrapperStyle(component)">
+    :style="wrapperStyle">
     <!-- 组件蒙层 -->
     <ComponentMask
       :isActive="isActiveComponent(component)"
@@ -17,8 +17,8 @@
     <!-- 渲染组件 -->
     <component
       :is="component.type"
-      :style="getComponentStyle(component)"
-      v-bind="normalizeProps(component.schema.props)"
+      :style="componentStyle"
+      v-bind="normalizeProps"
     >
       <!-- 递归渲染子组件 -->
       <template v-if="component.children?.length">
@@ -42,7 +42,7 @@
 </template>
 
 <script setup>
-import { ref, watch } from 'vue';
+import { ref, watch, computed } from 'vue';
 import ComponentMask from './component-mask.vue';
 
 defineOptions({
@@ -100,35 +100,30 @@ const handleComponentNodeDelete = (component) => {
   emit('onComponentNodeDelete', component);
 };
 
-const normalizeProps = (propsArray) => {
-  if (!propsArray) return {};
-  return propsArray.reduce((acc, prop) => {
+// 把 component.schema.props 从数组转换成对象
+const normalizeProps = computed(() => {
+  if (!props.component?.schema?.props) return {};
+  return props.component.schema.props.reduce((acc, prop) => {
     acc[prop.key] = prop.value;
     return acc;
   }, {});
-};
+})
 
-const normalizeStyle = (styleArray) => {
-  if (!styleArray) return {};
-  return styleArray.reduce((acc, style) => {
+// 把 component.schema.style 从数组转换成对象
+const normalizeStyle = computed(() => {
+  if (!props.component?.schema?.style) return {};
+  return props.component.schema.style.reduce((acc, style) => {
     if (style.value !== undefined && style.value !== null) {
       acc[style.key] = isNaN(style.value) ? style.value : `${style.value}px`;
     }
     return acc;
   }, {});
-};
+})
 
-const getWrapperStyle = (component) => {
-  if (!component) return {};
-  if (component.categoryType === 'page') {
-    return { display: 'block', width: '100%', minHeight: '100%' };
-  }
-  return normalizeStyle(component.schema?.style || []);
-};
-
-const getComponentStyle = (component) => {
-  if (!component) return {};
-  const style = normalizeStyle(component.schema?.style || []);
+const componentStyle = computed(() => {
+  if (!props.component) return {};
+  const style = normalizeStyle.value;
+  // 处理百分比
   if (style.width?.includes('%')) {
     style.width = '100%';
   }
@@ -136,7 +131,15 @@ const getComponentStyle = (component) => {
     style.height = '100%';
   }
   return style;
-};
+})
+
+const wrapperStyle = computed(() => { 
+  if (!props.component) return {};
+  if (props.component.categoryType === 'page') {
+    return { display: 'block', width: '100%', minHeight: '100%' };
+  }
+  return { ...normalizeStyle.value };
+})
 
 // 监听 activeComponentNode.schema
 watch(
