@@ -71,7 +71,18 @@
           :allow-drop="allowDrop"
           :allow-drag="allowDrag"
           @node-click="handleOutlineNodeClick"
-        />
+        >
+          <template #default="{ node, data }">
+            <el-tooltip
+              class="box-item"
+              effect="dark"
+              :content="data.id"
+              placement="right"
+            >
+              <span>{{ data.label }}</span>
+            </el-tooltip>
+          </template>
+        </el-tree>
       </template>
     </div>
   </div>

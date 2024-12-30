@@ -2,9 +2,10 @@
   <div class="data-field">
     <el-button type="primary" size="small" @click="handleAddDataModel">添加数据模型</el-button>
     <el-table :data="dataModelList" style="width: 100%">
-      <el-table-column prop="name" label="名称"/>
+      <el-table-column prop="id" label="数据模型ID"/>
+      <el-table-column prop="name" label="数据模型名称"/>
       <el-table-column prop="method" label="方法"/>
-      <el-table-column prop="url" label="地址" width="120" />
+      <el-table-column prop="url" label="接口地址" />
       <el-table-column fixed="right" label="操作" min-width="120">
         <template #default="scope">
           <el-button link type="primary" size="small" @click="handleDeleteDataModel(scope.row)">删除</el-button>
@@ -89,13 +90,6 @@ import DataModelConfig from './DataModelConfig.vue';
 const emit = defineEmits(['onDataModelChange'])
 
 const dataModelList = inject('dataModelList');
-
-const props = defineProps({
-  initData: {
-    type: Array,
-    default: () => []
-  }
-})
 
 const activeTab = ref('query');
 const methodOptions = ['GET', 'POST', 'PUT', 'DELETE']
@@ -211,7 +205,7 @@ const handleDeleteDataModel = (row) => {
 }
 
 const setDataModelToStorage = (data) => {
-  sessionStorage.setItem('plex-data-model', JSON.stringify(data));
+  localStorage.setItem('plex-data-model', JSON.stringify(data));
 }
 </script>
 

@@ -9,7 +9,7 @@
         :name="tab.value">
         <!-- 样式配置 -->
         <template v-if="activeTab === 'style'">
-          <div class="props-item" v-for="item in $style" :key="item.key">
+          <div class="schema-item" v-for="item in $style" :key="item.key">
             <div class="label">{{ item.label }}:</div>
             <template v-if="item.type === 'string'">
               <template v-if="item.options && item.options.length">
@@ -34,7 +34,7 @@
         </template>
         <!-- 属性配置 -->
         <template v-if="activeTab === 'props'">
-          <div class="props-item" v-for="item in $props" :key="item.key">
+          <div class="schema-item" v-for="item in $props" :key="item.key">
             <div class="label">{{ item.label }}:</div>
             <template v-if="item.key === 'dataModel'">
               <el-tree-select
@@ -46,7 +46,10 @@
               ></el-tree-select>
             </template>
             <template v-else>
-              <template v-if="item.type === 'string'">
+              <template v-if="item.type === 'boolean'">
+                <el-switch v-model="item.value" />
+              </template>
+              <template v-else>
                 <template v-if="item.options && item.options.length">
                   <el-select class="form-item" v-model="item.value">
                     <el-option v-for="option in item.options" :value="option" :key="option">{{ option }}</el-option>
@@ -56,17 +59,66 @@
                   <el-input class="form-item" v-model="item.value" />
                 </template>
               </template>
-              <template v-else-if="item.type === 'number'">
-                <el-input class="form-item" v-model="item.value" type="number"/>
-              </template>
-              <template v-else-if="item.type === 'boolean'">
-                <el-switch v-model="item.value" />
-              </template>
             </template>
           </div>
         </template>
         <!-- 事件配置 -->
-        <template v-if="activeTab === 'events'">事件配置</template>
+        <template v-if="activeTab === 'events'">
+          <div style="text-align: center;margin-bottom: 10px;"><el-button type="primary" @click="addEvent" size="small">添加事件</el-button></div>
+          <el-collapse v-model="activeEventNames">
+            <el-collapse-item v-for="(event, eventIndex) in $events" :key="eventIndex" :name="eventIndex">
+              <template #title>
+                <el-popconfirm title="知道你自己在干啥吧？" hide-icon @confirm="removeEvent(eventIndex)">
+                  <template #reference>
+                    <el-button type="danger" link @click.stop>删除事件</el-button>
+                  </template>
+                </el-popconfirm>
+              </template>
+              <div class="event-item">
+                <el-row :gutter="20">
+                  <el-col :span="21">
+                    <el-select v-model="event.name" placeholder="请选择事件类型">
+                      <el-option
+                        v-for="type in eventsEnums"
+                        :key="type.key"
+                        :label="type.label"
+                        :value="type.key"/>
+                    </el-select>
+                  </el-col>
+                </el-row>
+
+                <div style="text-align: center;margin-top: 10px;"><el-button type="success" @click="addTask(eventIndex)" size="small">绑定任务</el-button></div>
+                <div v-for="(task, taskIndex) in event.taskQueue" :key="taskIndex" class="task-item">
+                  <el-row>
+                    <el-col :span="11">
+                      <el-select v-model="task.taskId" placeholder="任务类型">
+                        <el-option
+                          v-for="taskOption in tasksList"
+                          :key="taskOption.id"
+                          :label="taskOption.name"
+                          :value="taskOption.id"
+                        />
+                      </el-select>
+                    </el-col>
+                    <el-col :span="11">
+                      <el-select v-model="task.type" placeholder="是否为异步任务">
+                        <el-option
+                          v-for="taskTypeOption in taskTypeEnums"
+                          :key="taskTypeOption.value"
+                          :label="taskTypeOption.label"
+                          :value="taskTypeOption.value"
+                        />
+                      </el-select>
+                    </el-col>
+                    <el-col :span="2">
+                      <el-button type="danger" :icon="Delete" circle size="small" @click="removeTask(eventIndex, taskIndex)"/>
+                    </el-col>
+                  </el-row>
+                </div>
+              </div>
+            </el-collapse-item>
+          </el-collapse>
+        </template>
       </el-tab-pane>
     </el-tabs>
   </div>
@@ -74,19 +126,23 @@
 
 <script setup>
 import { computed, ref, watch, inject } from 'vue';
+import { Delete } from '@element-plus/icons-vue'
+import eventsEnums from '../../utils/eventEnums';
+import taskTypeEnums from '../../utils/taskTypeEnums';
 
 // Props
 const props = defineProps({
 	activeComponentNode: {
 		type: Object,
-		default: () => null
+		default: () => {}
 	}
 });
 
 const dataModelList = inject('dataModelList');
+const tasksList = inject('tasksList');
 
 const emit = defineEmits([
-  'onPropsChange',
+  'onSchemaChange'
 ]);
 
 const tabCategories = ref([
@@ -105,9 +161,10 @@ const tabCategories = ref([
 ])
 
 const activeTab = ref('style')
+const $props = ref([])
 const $style = ref([])
 const $events = ref([])
-const $props = ref([])
+const activeEventNames = ref([0])
 
 function transformToTreeSelect(dataModel) {
   // 递归转换函数
@@ -134,7 +191,7 @@ function transformToTreeSelect(dataModel) {
     };
 
     // 将 query, body, response 转换为树结构
-    ["query", "body", "response"].forEach((key) => {
+    ["response"].forEach((key) => {
       if (item[key] && item[key].length > 0) {
         rootNode.children.push({
           value: `${item.id}.${key}`,
@@ -152,41 +209,87 @@ const dataModelTree = computed(() => {
   return transformToTreeSelect(dataModelList.value)
 })
 
-// Watch
+// 添加新事件
+const addEvent = () => {
+  $events.value.push({
+    name: '', // 事件类型
+    taskQueue: [], // 任务队列
+  });
+}
+// 删除事件
+const removeEvent = (eventIndex) => {
+  $events.value.splice(eventIndex, 1);
+}
+// 添加任务到指定事件
+const addTask = (eventIndex) => {
+  $events.value[eventIndex].taskQueue.push({
+    taskId: '', // 任务id
+    type: taskTypeEnums[0].value, // 同步/异步
+  });
+}
+// 删除指定任务
+const removeTask = (eventIndex, taskIndex) => {
+  $events.value[eventIndex].taskQueue.splice(taskIndex, 1);
+}
+
 watch(
-  () => props.activeComponentNode?.schema,
+  () => props.activeComponentNode?.id,
   (newVal) => {
-    // newVal 和 oldVal 值一直是一样的，因为他们是同一个对象，这是 Vue 设计缺陷
     if (!newVal) return
-    if (newVal?.props) {
-      $props.value = [...newVal?.props]
-      emitSchemeProps(newVal?.props)
+    const { schema } = props.activeComponentNode
+    $props.value = JSON.parse(JSON.stringify(schema?.props || []))
+    $style.value = JSON.parse(JSON.stringify(schema?.style || []))
+
+    // 事件特殊处理
+    if (!schema?.events) {
+      schema.events = [] // 用于存储动态添加的事件及其任务队列
     }
-    if (newVal?.style) {
-      $style.value = [...newVal?.style]
-      emitSchemeStyle(newVal?.style)
-    }
-    if (newVal?.events) {
-      $events.value = [...newVal?.events]
-      emitSchemeEvents(newVal?.events)
-    }
+    const tempEvents = JSON.parse(JSON.stringify(schema.events))
+    $events.value = tempEvents.map(item => {
+      if (!item.taskQueue) {
+        item.taskQueue = []
+      }
+      return item
+    })
   },
   {
-    deep: true,
     immediate: true
   }
 )
 
-const emitSchemeProps =  function (newVal) {
-  if (!newVal || !newVal.length) return
-  const newProps = newVal.reduce((acc, prop) => {
-    acc[prop.key] = prop.value;
-    return acc;
-  })
-  emit('onPropsChange', props.activeComponentNode, newProps)
-}
-const emitSchemeStyle = function (_style) {}
-const emitSchemeEvents = function (_events) {}
+watch(
+  () => $props,
+  (newVal) => {
+    emit('onSchemaChange', {
+      id: props.activeComponentNode.id,
+      key: 'props',
+      value: JSON.parse(JSON.stringify(newVal.value))
+    })
+  },
+  { deep: true }
+)
+watch(
+  () => $style,
+  (newVal) => {
+    emit('onSchemaChange', {
+      id: props.activeComponentNode.id,
+      key: 'style',
+      value: JSON.parse(JSON.stringify(newVal.value))
+    })
+  },
+  { deep: true }
+)
+watch(
+  () => $events,
+  (newVal) => {
+    emit('onSchemaChange', {
+      id: props.activeComponentNode.id,
+      key: 'events',
+      value: JSON.parse(JSON.stringify(newVal.value))
+    })
+  },
+  { deep: true }
+)
 </script>
 
 <style lang="less" scoped>
@@ -206,7 +309,7 @@ const emitSchemeEvents = function (_events) {}
   .form-item {
     width: @input-width;
   }
-  .props-item {
+  .schema-item {
     display: flex;
     align-items: center;
     justify-content: flex-start;
@@ -217,6 +320,21 @@ const emitSchemeEvents = function (_events) {}
       padding-right: 10px;
       text-align: right;
     }
+  }
+  .event-item {
+    box-sizing: border-box;
+    margin-bottom: 10px;
+    padding: 10px;
+    border: 1px solid #e4e4e4;
+    border-radius: 5px;
+    background-color: #f9f9f9;
+  }
+  .task-item {
+    margin-top: 10px;
+    padding: 10px;
+    border: 1px dashed #dcdcdc;
+    border-radius: 5px;
+    background-color: #f5f5f5;
   }
 }
 </style>

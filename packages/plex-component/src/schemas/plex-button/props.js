@@ -1,18 +1,17 @@
 // 属性
 const props = [
   {
-    label: '尺寸',
+    label: '按钮文本',
     type: 'string',
-    options: ['medium', 'small', 'mini'],
-    key: 'size',
-    value: '' // 默认值
+    key: 'slot',
+    value: '按钮' // 默认值
   },
   {
     label: '类型',
     type: 'string',
     options: ['default', 'primary', 'success', 'warning', 'danger'],
     key: 'type',
-    value: 'default' // 默认值
+    value: 'primary' // 默认值
   },
   {
     label: '是否朴素按钮',

@@ -8,6 +8,7 @@
       :style="componentStyle"
       v-bind="normalizeProps"
       v-model="dataBind[normalizeProps.field]"
+      v-on="normalizeEvents"
     >
       <!-- 递归渲染子组件 -->
       <template v-if="component.children?.length">
@@ -16,6 +17,7 @@
           :key="$component.id"
           :component="$component"/>
       </template>
+      <template v-else-if="normalizeProps.slot">{{ normalizeProps.slot }}</template>
       <template v-else-if="component.label">{{ component.label }}</template>
     </component>
   </div>
@@ -30,6 +32,7 @@ defineOptions({
   name: 'PreviewRenderer'
 });
 
+const tasksList = inject('tasksList');
 const elementRef = ref();
 
 // Props
@@ -78,6 +81,30 @@ const normalizeStyle = computed(() => {
     }
     return acc;
   }, {});
+})
+
+// 把 component.schema.events 从数组转换成对象
+const normalizeEvents = computed(() => {
+  if (!props.component?.schema?.events) return {};
+  const res = props.component.schema.events.reduce((acc, event) => {
+    if (event.taskQueue?.length) {
+      acc[event.name] = ($event) => {
+        $event.stopPropagation();
+        $event.preventDefault();
+       // Todo: 事件处理
+        event.taskQueue.forEach(task => {
+          const $task = tasksList.value.find(item => item.id === task.taskId);
+          console.log('>>> task: ', $task);
+          if ($task.type === 'api') {
+            // fetchApi(task.url, task.method, task.query, task.body);
+          }
+        })
+      }
+    }
+    return acc;
+  }, {});
+  console.log('>>> normalizeEvents: ', res);
+  return res;
 })
 
 const componentStyle = computed(() => {
@@ -133,6 +160,7 @@ onMounted(async () => {
       // 数据模型动态绑定
       if (key === 'dataModel') {
         const { url, method, dataModelFieldType, dataModelFieldPath } = findBindDataModel();
+        if (!url || !method) return;
         const res = await fetchApi(url, method)
         if (!res) return;
         if (dataModelFieldType === 'response') {

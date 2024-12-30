@@ -4,6 +4,7 @@
     <div class="toolbar-left">Plex Designer3</div>
     <div class="toolbar-center">
       <el-button size="small" @click="$emit('onSetDataModel')">数据模型配置</el-button>
+      <el-button size="small" @click="$emit('onSetTasks')">任务配置</el-button>
     </div>
     <div class="toolbar-right">
       <el-button type="primary" size="small" @click="$emit('onPreview')">预览</el-button>

@@ -36,6 +36,7 @@
           @setActiveNodeMaskStyle="$emit('setActiveNodeMaskStyle', $event)"
         />
       </template>
+      <template v-else-if="normalizeProps.slot">{{ normalizeProps.slot }}</template>
       <template v-else-if="component.label">{{ component.label }}</template>
     </component>
   </div>

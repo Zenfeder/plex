@@ -3,6 +3,7 @@
   <div class="design-container">
     <pd-toolbar
       @onSetDataModel="handleSetDataModel"
+      @onSetTasks="handleSetTasks"
       @onPreview="handlePreview"
       @onSave="handleSave"/>
     <div class="design-body" v-if="isLoaded">
@@ -24,8 +25,9 @@
         @setActiveNodeMaskStyle="handleSetActiveNodeMaskStyle"/>
 
       <pd-schema class="schema-box"
+        v-if="activeComponentNode"
         :activeComponentNode="activeComponentNode"
-        @onPropsChange="handlePropsChange"/>
+        @onSchemaChange="handleSchemaChange"/>
     </div>
   </div>
 </template>
@@ -37,7 +39,7 @@ const props = defineProps({
     default: () => []
   }
 })
-import { getCurrentInstance, onMounted, ref, computed } from 'vue';
+import { getCurrentInstance, onMounted, ref, computed, inject } from 'vue';
 import { registerVue3ComponentDynamic } from 'plex-core';
 import PdToolbar from './toolbar.vue';
 import PdMaterial from './material.vue';
@@ -58,13 +60,14 @@ const emit = defineEmits([
   'onPropsChange',
   'onPreview',
   'onSave',
-  'onSetDataModel'
+  'onSetDataModel',
+  'onSetTasks'
 ]);
 
 const instance = getCurrentInstance();
 let isLoaded = ref(false);
 let materialList = ref([]);
-let componentsTree = ref([]);
+let componentsTree = inject('componentsTree');
 let activeComponentNodeId = ref('');
 
 const activeComponentNode = computed(() => {
@@ -186,12 +189,16 @@ const handleSave = function () {
   emit('onSave', componentsTree.value);
 }
 
-const handlePropsChange = function (activeComponent, newProps) {
-  emit('onPropsChange', activeComponent, newProps);
+const handleSchemaChange = function ({ id, key, value }) {
+  const componentNode = findComponentNodeById(componentsTree.value, id);
+  componentNode.schema[key] = value;
 }
 
 const handleSetDataModel = function (data) {
   emit('onSetDataModel', data);
+}
+const handleSetTasks = function (data) {
+  emit('onSetTasks', data);
 }
 
 const initPage = function () {

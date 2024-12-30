@@ -3,7 +3,8 @@
     :materialConfig="materialConfig"
     @onPreview="handlePreview"
     @onSave="handleSave"
-    @onSetDataModel="dialogDataModelVisible = true"/>
+    @onSetDataModel="dialogDataModelVisible = true"
+    @onSetTasks="dialogTasksVisible = true"/>
 
   <!-- 预览弹窗 -->
   <el-dialog
@@ -13,7 +14,7 @@
     :fullscreen="true"
     @close="handlePreviewClose"
   >
-    <Preview :componentsTree="componentsTree"/>
+    <Preview />
   </el-dialog>
 
   <!-- 数据模型配置弹窗 -->
@@ -24,22 +25,38 @@
   >
       <DataModelConfig />
   </el-dialog>
+
+  <!-- 任务配置弹窗 -->
+  <el-dialog
+    v-model="dialogTasksVisible"
+    title="任务配置"
+    :fullscreen="true"
+  >
+      <TasksConfig />
+  </el-dialog>
 </template>
 
 <script setup>
-import { ref, reactive, onMounted, provide, readonly } from 'vue'
+import { ref, onMounted, provide, onBeforeUnmount } from 'vue'
 import Designer from './components/designer';
 import Preview from './components/preview';
 import DataModelConfig from './components/data-model-config';
+import TasksConfig from './components/tasks-config';
 import _ from 'lodash';
 
 const dialogPreviewVisible = ref(false);
 const dialogDataModelVisible = ref(false);
-const componentsTree = ref({});
+const dialogTasksVisible = ref(false);
+const componentsTree = ref([]);
+provide('componentsTree', componentsTree);
 
-// 全局数据域管理
+// 全局数据模型管理
 const dataModelList = ref([]);
 provide('dataModelList', dataModelList);
+
+// 全局任务管理
+const tasksList = ref([]);
+provide('tasksList', tasksList);
 
 defineOptions({
   name: 'PlexDesigner'
@@ -58,7 +75,6 @@ const emit = defineEmits([
 ]);
 
 const handlePreview = (data) => {
-  componentsTree.value = data;
   dialogPreviewVisible.value = true;
   emit('onPreview', componentsTree.value);
 }
@@ -66,14 +82,21 @@ const handlePreview = (data) => {
 const handlePreviewClose = () => {}
 
 const handleSave = (data) => {
-  componentsTree.value = data;
   emit('onSave', componentsTree.value);
 }
 
 onMounted(() => {
-  const data = JSON.parse(sessionStorage.getItem('plex-data-model'));
-  if (data) {
-    dataModelList.value = data;
-  }
+  const componentsTreeLocal = JSON.parse(localStorage.getItem('plex-components-tree'));
+  const modelListLocal = JSON.parse(localStorage.getItem('plex-data-model'));
+  const tasksListLocal = JSON.parse(localStorage.getItem('plex-tasks'));
+
+  componentsTreeLocal && (componentsTree.value = componentsTreeLocal);
+  modelListLocal && (dataModelList.value = modelListLocal);
+  tasksListLocal && (tasksList.value = tasksListLocal);
 })
+
+window.onbeforeunload = () => {
+  // 缓存工作区正在搭建的组件树
+  localStorage.setItem('plex-components-tree', JSON.stringify(componentsTree.value));
+}
 </script>
