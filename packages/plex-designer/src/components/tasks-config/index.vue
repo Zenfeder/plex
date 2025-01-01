@@ -72,6 +72,7 @@ import { reactive, ref, watch, computed, inject } from 'vue';
 import { ElMessage } from 'element-plus';
 import { generateRandomString } from '../../utils/common';
 import taskEnums from '../../utils/taskEnums';
+import { useComponentListWithKeys } from '../../hooks/components-tree-helper';
 
 const emit = defineEmits(['onTasksChange']);
 
@@ -92,21 +93,7 @@ const dialogTitle = computed(() => {
   dialogMode.value === 'add' ? '添加任务' : '编辑任务'
 });
 
-const componentListWithField = computed(() => {
-  const result = [];
-  function traverse(node) {
-    if (node?.schema?.props && node?.schema?.props.length > 0) {
-      let target = node.schema.props.find(prop => prop.key === 'field')
-      target && result.push(node);
-    }
-    if (Array.isArray(node.children) && node.children.length > 0) {
-      node.children.forEach(child => traverse(child));
-    }
-  }
-
-  componentsTree.value.forEach(node => traverse(node));
-  return result;
-});
+const componentListWithField = useComponentListWithKeys(componentsTree, ['field']);
 
 const validateField = (value, fieldName) => {
   if (!value.trim()) {
@@ -124,7 +111,7 @@ const handleDataModelChange = () => {
     dataModel.query.map(item => {
       taskForm.dataModelParams.push({
         keyPath: 'query.' + item.name,
-        bindValueType: 'field', // 绑定的值类型。暂时只支持组件 
+        bindPropsKey: 'field', // 绑定的值类型。暂时只支持组件 
         bindComponentId: '', // 绑定的值路径。暂时只支持组件 field 字段
       })
     })
@@ -133,7 +120,7 @@ const handleDataModelChange = () => {
     dataModel.body.map(item => {
       taskForm.dataModelParams.push({
         keyPath: 'body.' + item.name,
-        bindValueType: 'field', // 绑定的值类型。暂时只支持组件
+        bindPropsKey: 'field', // 绑定的值类型。暂时只支持组件
         bindComponentId: '', // 绑定的值路径。暂时只支持组件 field 字段: '', // 绑定的值路径。暂时只支持组件 field 字段
       })
     })
@@ -218,7 +205,7 @@ const setTasksToStorage = (data) => {
 //       dataModel.query.map(item => {
 //         taskForm.dataModelParams.push({
 //           keyPath: 'query.' + item.name,
-//           bindValueType: 'field', // 绑定的值类型。暂时只支持组件 
+//           bindPropsKey: 'field', // 绑定的值类型。暂时只支持组件 
 //           bindComponentId: '', // 绑定的值路径。暂时只支持组件 field 字段
 //         })
 //       })
@@ -227,7 +214,7 @@ const setTasksToStorage = (data) => {
 //       dataModel.body.map(item => {
 //         taskForm.dataModelParams.push({
 //           keyPath: 'body.' + item.name,
-//           bindValueType: 'field', // 绑定的值类型。暂时只支持组件
+//           bindPropsKey: 'field', // 绑定的值类型。暂时只支持组件
 //           bindComponentId: '', // 绑定的值路径。暂时只支持组件 field 字段: '', // 绑定的值路径。暂时只支持组件 field 字段
 //         })
 //       })

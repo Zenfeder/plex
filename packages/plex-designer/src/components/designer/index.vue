@@ -202,6 +202,10 @@ const handleSetTasks = function (data) {
 }
 
 const initPage = function () {
+  if (componentsTree.value.length) {
+    activeComponentNodeId.value = componentsTree.value[0].id
+    return
+  }
   // Todo: 待优化，这里默认第一项是系统组件库，并且默认把第一个组件（plex-page）加入到画布中，考虑做成配置化？
   handleMaterialClick({
     libraryName: materialList.value[0].libraryName,
@@ -212,7 +216,7 @@ const initPage = function () {
 
 onMounted(async() => {
   await loadMaterials(props.materialConfig);
-  initPage();
+  initPage(); 
 });
 </script>
 

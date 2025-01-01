@@ -37,7 +37,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted, provide, onBeforeUnmount } from 'vue'
+import { ref, onMounted, provide } from 'vue'
 import Designer from './components/designer';
 import Preview from './components/preview';
 import DataModelConfig from './components/data-model-config';
@@ -98,5 +98,7 @@ onMounted(() => {
 window.onbeforeunload = () => {
   // 缓存工作区正在搭建的组件树
   localStorage.setItem('plex-components-tree', JSON.stringify(componentsTree.value));
+  localStorage.setItem('plex-data-model', JSON.stringify(dataModelList.value));
+  localStorage.setItem('plex-tasks', JSON.stringify(tasksList.value));
 }
 </script>

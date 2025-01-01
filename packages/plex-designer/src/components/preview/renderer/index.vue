@@ -7,7 +7,7 @@
       :is="component.type"
       :style="componentStyle"
       v-bind="normalizeProps"
-      v-model="dataBind[normalizeProps.field]"
+      v-model="dataBind[`${component.id}.${normalizeProps.field}`]"
       v-on="normalizeEvents"
     >
       <!-- 递归渲染子组件 -->
@@ -15,7 +15,8 @@
         <PreviewRenderer
           v-for="$component in component.children"
           :key="$component.id"
-          :component="$component"/>
+          :component="$component"
+          @onCustomEvent="handleCustomEvent"/>
       </template>
       <template v-else-if="normalizeProps.slot">{{ normalizeProps.slot }}</template>
       <template v-else-if="component.label">{{ component.label }}</template>
@@ -24,7 +25,7 @@
 </template>
 
 <script setup>
-import { reactive, ref, watch, computed, onMounted, inject } from 'vue';
+import { ref, watch, computed, onMounted, inject } from 'vue';
 import axios from 'axios';
 import _ from 'lodash';
 
@@ -32,7 +33,6 @@ defineOptions({
   name: 'PreviewRenderer'
 });
 
-const tasksList = inject('tasksList');
 const elementRef = ref();
 
 // Props
@@ -61,7 +61,11 @@ const emit = defineEmits([
   'onComponentNodeMoveUp',
   'onComponentNodeDelete',
   'setActiveNodeMaskStyle',
+  'onCustomEvent',
 ]);
+
+const dataModelList = inject('dataModelList');
+const dataBind = inject('dataBind');
 
 // 把 component.schema.props 从数组转换成对象
 const normalizeProps = computed(() => {
@@ -89,23 +93,27 @@ const normalizeEvents = computed(() => {
   const res = props.component.schema.events.reduce((acc, event) => {
     if (event.taskQueue?.length) {
       acc[event.name] = ($event) => {
+        emit('onCustomEvent', {
+          eventName: event.name,
+          taskQueue: event.taskQueue,
+          event: $event,
+        })
         $event.stopPropagation();
         $event.preventDefault();
-       // Todo: 事件处理
-        event.taskQueue.forEach(task => {
-          const $task = tasksList.value.find(item => item.id === task.taskId);
-          console.log('>>> task: ', $task);
-          if ($task.type === 'api') {
-            // fetchApi(task.url, task.method, task.query, task.body);
-          }
-        })
       }
     }
     return acc;
   }, {});
-  console.log('>>> normalizeEvents: ', res);
   return res;
 })
+
+const handleCustomEvent = ({ eventName, taskQueue, event }) => {
+  emit('onCustomEvent', {
+    eventName,
+    taskQueue,
+    event,
+  })
+}
 
 const componentStyle = computed(() => {
   if (!props.component) return {};
@@ -127,8 +135,6 @@ const wrapperStyle = computed(() => {
   }
   return { ...normalizeStyle.value };
 })
-const dataModelList = inject('dataModelList');
-const dataBind = reactive({});
 
 const fetchApi = async (url, method, query, body) => {
   try {
@@ -139,37 +145,35 @@ const fetchApi = async (url, method, query, body) => {
   }
 }
 
-const findBindDataModel = () => {
-  const dataModelPath = normalizeProps.value.dataModel;
-  const dataModelId = dataModelPath.split('.')[0];
-  const dataModelFieldType = dataModelPath.split('.')[1];
-  const dataModelFieldPath = dataModelPath.split('.').slice(2).join('.');
-  const dataModel = dataModelList.value.find(item => item.id === dataModelId);
-  if (!dataModel) return {};
-  const { url, method } = dataModel;
-  return { url, method, dataModelId, dataModelFieldType, dataModelFieldPath };
-}
+// const findBindDataModel = (dataModelValue) => {
+//   const dataModelValue = normalizeProps.value.dataModel;
+//   if (!dataModelValue) return {};
+//   // dataModelPath 的格式示例：hWzC3X1M5wgbr5s2.response.data.username
+//   const dataModelId = dataModelValue.split('.')[0];
+//   const dataModelFieldType = dataModelValue.split('.')[1];
+//   const dataModelFieldPath = dataModelValue.split('.').slice(2).join('.');
+//   const dataModel = dataModelList.value.find(item => item.id === dataModelId);
+//   if (!dataModel) return {};
+//   const { url, method } = dataModel;
+//   return { url, method, dataModelId, dataModelFieldType, dataModelFieldPath };
+// }
 
-onMounted(async () => {
-  if (dataModelList.value.length) {
-    for (const key in normalizeProps.value) {
-      // 字段动态绑定
-      if (key === 'field') {
-        // dataBind[normalizeProps.value[key]] = '';
-      }
-      // 数据模型动态绑定
-      if (key === 'dataModel') {
-        const { url, method, dataModelFieldType, dataModelFieldPath } = findBindDataModel();
-        if (!url || !method) return;
-        const res = await fetchApi(url, method)
-        if (!res) return;
-        if (dataModelFieldType === 'response') {
-          dataBind[normalizeProps.value['field']] = _.get(res, dataModelFieldPath);
-        }
-      }
-    }
-  }
-})
+// onMounted(async () => {
+//   if (dataModelList.value.length) {
+//     for (const key in normalizeProps.value) {
+//       // 数据模型动态绑定
+//       if (key === 'dataModel') {
+//         const { url, method, dataModelFieldType, dataModelFieldPath } = findBindDataModel();
+//         if (!url || !method) return;
+//         const res = await fetchApi(url, method)
+//         if (!res) return;
+//         if (dataModelFieldType === 'response') {
+//           dataBind[`${props.component.id}.${normalizeProps.value['field']}`] = _.get(res, dataModelFieldPath);
+//         }
+//       }
+//     }
+//   }
+// })
 
 // 监听 activeComponentNode.schema
 watch(
