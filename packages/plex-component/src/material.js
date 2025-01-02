@@ -34,6 +34,10 @@ export default {
         {
           label: "输入框",
           type: "plex-input",
+        },
+        {
+          label: "下拉选择框",
+          type: "plex-select",
         }
       ]
     },

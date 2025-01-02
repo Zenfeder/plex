@@ -1,7 +1,7 @@
 export default [
   {
     label: '接口请求',
-    value: 'api',
+    value: 'API',
   },
   // {
   //   label: '弹窗',

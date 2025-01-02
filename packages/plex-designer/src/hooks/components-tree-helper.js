@@ -1,15 +1,12 @@
 import { ref, computed } from 'vue'
 
-// 查找 props 中同时包含 keys 中给定的多个 key 的组件
-export function useComponentListWithKeys(componentsTree, keys) {
-  const componentListWithField = computed(() => {
+// 将树形数据结构扁平化，同时过滤掉不满足条件的元素
+export function useFlattenAndFilterComponentTree(componentsTree, filter) {
+  const componentTreeFlatten = computed(() => {
     const result = [];
     function traverse(node) {
-      if (node?.schema?.props && node?.schema?.props.length > 0) {
-        const propsAllKeys = node.schema.props.map(prop => prop.key);
-        if (keys.every(key => propsAllKeys.includes(key))) {
-          result.push(node);
-        }
+      if (filter(node)) {
+        result.push(node);
       }
       if (Array.isArray(node.children) && node.children.length > 0) {
         node.children.forEach(child => traverse(child));
@@ -19,5 +16,5 @@ export function useComponentListWithKeys(componentsTree, keys) {
     componentsTree.value.forEach(node => traverse(node));
     return result;
   });
-  return componentListWithField;
+  return componentTreeFlatten;
 }

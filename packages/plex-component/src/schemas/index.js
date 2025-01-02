@@ -2,6 +2,7 @@ import Page from './plex-page';
 import ContainerBase from './plex-container-base';
 import Button from './plex-button';
 import Input from './plex-input';
+import Select from './plex-select';
 import ChartCommon from './plex-chart-common';
 
 export default {
@@ -9,6 +10,7 @@ export default {
   'plex-container-base': ContainerBase,
   'plex-button': Button,
   'plex-input': Input,
+  'plex-select': Select,
   'plex-chart-linebase': ChartCommon,
   'plex-chart-areabase': ChartCommon,
   'plex-chart-linestack': ChartCommon,

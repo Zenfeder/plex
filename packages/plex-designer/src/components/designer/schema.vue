@@ -36,13 +36,14 @@
         <template v-if="activeTab === 'props'">
           <div class="schema-item" v-for="item in $props" :key="item.key">
             <div class="label">{{ item.label }}:</div>
-            <template v-if="item.key === 'dataModel'">
+            <template v-if="item.hasOwnProperty('bindDataModel')">
               <el-tree-select
                 class="form-item"
-                v-model="item.value"
+                v-model="item.bindDataModel"
                 :data="dataModelTree"
                 :render-after-expand="false"
                 placement="left-start"
+                @change="handleDataModelChange"
               ></el-tree-select>
             </template>
             <template v-else>
@@ -90,8 +91,8 @@
                 <div style="text-align: center;margin-top: 10px;"><el-button type="success" @click="addTask(eventIndex)" size="small">绑定任务</el-button></div>
                 <div v-for="(task, taskIndex) in event.taskQueue" :key="taskIndex" class="task-item">
                   <el-row>
-                    <el-col :span="11">
-                      <el-select v-model="task.taskId" placeholder="任务类型">
+                    <el-col :span="14">
+                      <el-select v-model="task.taskId" placeholder="选择任务">
                         <el-option
                           v-for="taskOption in tasksList"
                           :key="taskOption.id"
@@ -100,8 +101,8 @@
                         />
                       </el-select>
                     </el-col>
-                    <el-col :span="11">
-                      <el-select v-model="task.type" placeholder="是否为异步任务">
+                    <el-col :span="8">
+                      <el-select v-model="task.type" placeholder="是否异步">
                         <el-option
                           v-for="taskTypeOption in taskTypeEnums"
                           :key="taskTypeOption.value"
@@ -111,7 +112,11 @@
                       </el-select>
                     </el-col>
                     <el-col :span="2">
-                      <el-button type="danger" :icon="Delete" circle size="small" @click="removeTask(eventIndex, taskIndex)"/>
+                      <el-popconfirm title="知道你自己在干啥吧？" hide-icon @confirm="removeTask(eventIndex, taskIndex)">
+                        <template #reference>
+                          <el-button type="danger" :icon="Delete" circle size="small"/>
+                        </template>
+                      </el-popconfirm>
                     </el-col>
                   </el-row>
                 </div>
@@ -209,6 +214,11 @@ const dataModelTree = computed(() => {
   return transformToTreeSelect(dataModelList.value)
 })
 
+const handleDataModelChange = (value) => {
+  // value 为选中的值，如 qBN8ouEo9PyFNGDE.response.data.address
+  console.log('>>> handleDataModelChange value: ', value);
+}
+
 // 添加新事件
 const addEvent = () => {
   $events.value.push({
@@ -246,6 +256,7 @@ watch(
     }
     const tempEvents = JSON.parse(JSON.stringify(schema.events))
     $events.value = tempEvents.map(item => {
+      // 如果没有任务队列，就初始化一个空数组
       if (!item.taskQueue) {
         item.taskQueue = []
       }

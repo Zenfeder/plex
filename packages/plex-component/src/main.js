@@ -3,6 +3,7 @@ import PlexPage from './components/plex-page';
 import PlexContainerBase from './components/plex-container-base';
 import PlexButton from './components/plex-button';
 import PlexInput from './components/plex-input';
+import PlexSelect from './components/plex-select';
 import PlexChartLinebase from './components/plex-chart-linebase';
 import PlexChartAreabase from './components/plex-chart-areabase';
 import PlexChartLinestack from './components/plex-chart-linestack';
@@ -25,6 +26,7 @@ const components = {
   PlexContainerBase,
   PlexButton,
   PlexInput,
+  PlexSelect,
   PlexChartLinebase,
   PlexChartAreabase,
   PlexChartLinestack,
@@ -57,6 +59,7 @@ export {
   PlexContainerBase,
   PlexButton,
   PlexInput,
+  PlexSelect,
   PlexChartLinebase,
   PlexChartAreabase,
   PlexChartLinestack,

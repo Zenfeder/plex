@@ -12,17 +12,21 @@
 <script setup>
 import { ref, provide, inject, reactive, onMounted } from 'vue';
 import axios from 'axios';
-import _ from 'lodash';
+import _, { isArray } from 'lodash';
 import PreviewRenderer from './renderer';
 import { findComponentNodeById } from '../../utils/component-tree-tools';
-import { useComponentListWithKeys } from '../../hooks/components-tree-helper';
+import { useFlattenAndFilterComponentTree } from '../../hooks/components-tree-helper';
 
 const componentsTree = inject('componentsTree');
 const dataModelList = inject('dataModelList');
 const tasksList = inject('tasksList');
 
-const componentListWithField = useComponentListWithKeys(componentsTree, ['field']);
-const componentListWithDataModel = useComponentListWithKeys(componentsTree, ['dataModel']);
+const componentListWithModelValue = useFlattenAndFilterComponentTree(componentsTree, (node) => {
+  return node.schema && node.schema.props && node.schema.props.find(prop => prop.key === 'modelValue');
+});
+const componentListBindDataModel = useFlattenAndFilterComponentTree(componentsTree, (node) => {
+  return node.schema && node.schema.props && node.schema.props.find(prop => prop.hasOwnProperty('bindDataModel'));
+});
 
 // 统一管理组件数据绑定
 const dataBind = reactive({});
@@ -32,86 +36,68 @@ const emit = defineEmits([
   'onCustomEvent',
 ]);
 
-// 收集组件树中所有的数据模型调用
-const collectAllDataModel = () => {}
-
-// 加载数据模型
-const loadDataModel = async () => {}
-
 const fetchApi = async (url, method, query, body) => {
   try {
-    const response = await axios({ method, url, params: query });
+    const response = await axios({ method, url, params: query, data: body });
     return response.data;
   } catch (error) {
     console.error(error);
   }
 }
-// 初始化 dataBind 字段。字段 key 统一以 ${组件id}.${组件schema.props.field} 为 key
+// 初始化 dataBind 字段。字段 key 统一以 ${组件id}.${组件schema.props.key} 为键，值初始化都为空字符串
 const initDataBind = () => {
-  componentListWithField.value.forEach(component => {
-    const { id, schema } = component;
-    const field = schema.props.find(prop => prop.key === 'field');
-    if (!field) return;
-    dataBind[`${id}.${field.value}`] = '';
+  componentListWithModelValue.value.forEach(component => {
+    const { id: componentId } = component;
+    dataBind[`${componentId}.modelValue`] = '';
+  })
+  componentListBindDataModel.value.forEach(component => {
+    const { id: componentId } = component;
+    const needBindDataModelProps = component.schema?.props?.filter(prop => prop.hasOwnProperty('bindDataModel'));
+    if (!needBindDataModelProps) return;
+    needBindDataModelProps.forEach(prop => {
+      // 要根据 prop.value 的默认值类型来初始化
+      dataBind[`${componentId}.${prop.key}`] = isArray(prop.value) ? [] : typeof prop.value === 'number' ? 0 : typeof prop.value === 'boolean' ? false : '';
+    })
   })
 }
 
 initDataBind();
-
-// 数据模型参数与组件field绑定
-const dataModelParamsBind = async () => {}
-
-// 数据模型响应与组件绑定
-const dataModelResponseBind = async () => {}
+console.log('>>> after init dataBind: ', dataBind);
 
 const handleCustomEvent = ({ eventName, taskQueue, event }) => {
   taskQueue.forEach(async task => {
     const $task = tasksList.value.find(item => item.id === task.taskId);
-    console.log('>>> task: ', $task);
-    // Todo: 事件处理
+    const { type: taskType, dataModelId: taskDataModelId, dataModelParams: taskDataModelParams } = $task;
     // 接口请求类任务处理
-    if ($task.type === 'api') {
-      // fetchApi(task.url, task.method, task.query, task.body);
-      const dataModel = dataModelList.value.find(item => item.id === $task.dataModelId);
-      console.log('>>> dataModel: ', dataModel);
+    if (taskType === 'API') {
+      const dataModel = dataModelList.value.find(item => item.id === taskDataModelId);
       const { url, method } = dataModel;
       const query = {};
 
       // 数据模型参数绑定
-      if (!$task.dataModelParams) return;
-      for (let i = 0; i < $task.dataModelParams.length; i++) {
-        const param = $task.dataModelParams[i];
-        // param 示例：{keyPath: 'query.id', bindPropsKey: 'field', bindComponentId: '40ZHa51g9auM8N78'}
+      if (!taskDataModelParams) return;
+      for (let i = 0; i < taskDataModelParams.length; i++) {
+        const param = taskDataModelParams[i]; // eg：{ keyPath: 'query.id', bindComponentId: '40ZHa51g9auM8N78' }
         if (param.bindComponentId) {
-          // 从嵌套树形结构 componentsTree 中递归查找
-          const componentNode = findComponentNodeById(componentsTree.value, param.bindComponentId);
-          console.log('>>> componentNode: ', componentNode);
-          const field = componentNode.schema.props.find(prop => prop.key === param.bindPropsKey);
-          if (field) {
-            query[param.keyPath.split('.')[1]] = dataBind[`${param.bindComponentId}.${field.value}`];
-          }
+          query[param.keyPath.split('.')[1]] = dataBind[`${param.bindComponentId}.modelValue`];
         }
       }
-      console.log('>>> query: ', query);
-      const response = await fetchApi(url, method, query, {});
-      console.log('>>> response: ', response);
+
       // 数据模型响应绑定
-      componentListWithDataModel.value.forEach(component => {
-        console.log('>>> componentListWithDataModel: ', component);
+      const response = await fetchApi(url, method, query, {});
+      componentListBindDataModel.value.forEach(component => {
         const { id, schema } = component;
-        const normalizeProps = schema.props.reduce((acc, prop) => {
-          acc[prop.key] = prop.value;
-          return acc;
-        }, {});
-        const dataModelValue = normalizeProps['dataModel']
-        const fieldValue = normalizeProps['field']
-        console.log('>>> dataModelValue: ', dataModelValue);
-        if (!dataModelValue) return;
-        // dataModelValue 的格式示例：hWzC3X1M5wgbr5s2.response.data.username
-        const dataModelFieldType = dataModelValue.split('.')[1];
-        const dataModelFieldPath = dataModelValue.split('.').slice(2).join('.');
-        if (dataModelFieldType === 'response') {
-          dataBind[`${id}.${fieldValue}`] = _.get(response, dataModelFieldPath);
+        const targetProps = schema?.props?.find(prop => prop.hasOwnProperty('bindDataModel'));
+        const bindDataModel = targetProps.bindDataModel; // eg：hWzC3X1M5wgbr5s2.response.data.username
+        if (!bindDataModel) return;
+        const bindDataModelId = bindDataModel.split('.')[0]; // 当前组件数据模型字段绑定的数据模型 id
+        const bindFieldType = bindDataModel.split('.')[1];
+        const bindFieldPath = bindDataModel.split('.').slice(2).join('.');
+        // 注意仅仅重置 dataBind 中，与当前数据模型绑定的字段的值
+        if (bindFieldType === 'response' && bindDataModelId === taskDataModelId) {
+          const bindFieldValue = _.get(response, bindFieldPath);  
+          dataBind[`${id}.${targetProps.key}`] = bindFieldValue === undefined ? dataBind[`${id}.${targetProps.key}`] : bindFieldValue;
+          targetProps.value = dataBind[`${id}.${targetProps.key}`]; // 这样会有数据缓存，组件树渲染时直接拿这个值渲染了
         }
       })
     }
@@ -122,10 +108,6 @@ const handleCustomEvent = ({ eventName, taskQueue, event }) => {
     event,
   })
 }
-
-// onMounted(() => {
-//   initDataBind();
-// });
 
 // 解决浏览器窗口大小变化，画布宽度不更新问题
 const refresh = ref(false);

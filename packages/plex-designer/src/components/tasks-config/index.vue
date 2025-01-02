@@ -16,7 +16,11 @@
       </el-table-column>
       <el-table-column fixed="right" label="操作" min-width="120">
         <template #default="scope">
-          <el-button link type="primary" size="small" @click="handleDeleteTask(scope.row)">删除</el-button>
+          <el-popconfirm title="知道你自己在干啥吧？" hide-icon @confirm="handleDeleteTask(scope.row)">
+            <template #reference>
+              <el-button link type="primary" size="small">删除</el-button>
+            </template>
+          </el-popconfirm>
           <el-button link type="primary" size="small" @click="handleEditTask(scope.row)">编辑</el-button>
         </template>
       </el-table-column>
@@ -35,12 +39,12 @@
           <el-option v-for="item in taskEnums" :key="item.value" :label="item.label" :value="item.value" />
         </el-select>
       </el-form-item>
-      <el-form-item v-if="taskForm.type === 'api'" label="绑定数据模型">
+      <el-form-item v-if="taskForm.type === 'API'" label="绑定数据模型">
         <el-select class="task-form-item" v-model="taskForm.dataModelId" placeholder="请选择数据类型" @change="handleDataModelChange">
-          <el-option v-for="item in dataModelList" :key="item.id" :label="item.name + '（' + item.id + '）'" :value="item.id" />
+          <el-option v-for="item in dataModelList.filter(item => item.type === 'API')" :key="item.id" :label="item.name + '（' + item.id + '）'" :value="item.id" />
         </el-select>
       </el-form-item>
-      <el-form-item v-if="taskForm.type === 'api' && taskForm.dataModelId" label="参数绑定">
+      <el-form-item v-if="taskForm.type === 'API' && taskForm.dataModelId" label="参数绑定">
         <el-descriptions title="为数据模型接口调用绑定参数" :column="1" border style="width: 600px;">
           <el-descriptions-item
             v-for="param in taskForm.dataModelParams"
@@ -52,7 +56,7 @@
             label-width="150px"
           >
             <el-select class="task-form-item" v-model="param.bindComponentId" placeholder="请选择你要绑定的组件" clearable>
-              <el-option v-for="node in componentListWithField" :key="node.id" :label="node.label + '（' + node.id + '）'" :value="node.id" />
+              <el-option v-for="node in componentList" :key="node.id" :label="node.label + '（' + node.id + '）'" :value="node.id" />
             </el-select>
           </el-descriptions-item>
         </el-descriptions>
@@ -72,7 +76,7 @@ import { reactive, ref, watch, computed, inject } from 'vue';
 import { ElMessage } from 'element-plus';
 import { generateRandomString } from '../../utils/common';
 import taskEnums from '../../utils/taskEnums';
-import { useComponentListWithKeys } from '../../hooks/components-tree-helper';
+import { useFlattenAndFilterComponentTree } from '../../hooks/components-tree-helper';
 
 const emit = defineEmits(['onTasksChange']);
 
@@ -82,7 +86,7 @@ const tasksList = inject('tasksList');
 
 const taskForm = reactive({
   name: '', // 任务名称
-  type: '',  // 任务类型。暂时仅支持 api
+  type: '',  // 任务类型。暂时仅支持 API
   dataModelId: '', // 绑定数据模型名称
   dataModelParams: [], // 绑定数据模型请求参数
 });
@@ -93,7 +97,7 @@ const dialogTitle = computed(() => {
   dialogMode.value === 'add' ? '添加任务' : '编辑任务'
 });
 
-const componentListWithField = useComponentListWithKeys(componentsTree, ['field']);
+const componentList = useFlattenAndFilterComponentTree(componentsTree, (node) => { return true });
 
 const validateField = (value, fieldName) => {
   if (!value.trim()) {
@@ -104,27 +108,20 @@ const validateField = (value, fieldName) => {
 };
 
 const handleDataModelChange = () => {
-  const dataModel = dataModelList.value.find(item => item.id === taskForm.dataModelId)
-  if (!dataModel) return
-  taskForm.dataModelParams = []
-  if (dataModel.query && dataModel.query.length) {
-    dataModel.query.map(item => {
-      taskForm.dataModelParams.push({
-        keyPath: 'query.' + item.name,
-        bindPropsKey: 'field', // 绑定的值类型。暂时只支持组件 
-        bindComponentId: '', // 绑定的值路径。暂时只支持组件 field 字段
-      })
-    })
-  }
-  if (dataModel.body && dataModel.body.length) {
-    dataModel.body.map(item => {
-      taskForm.dataModelParams.push({
-        keyPath: 'body.' + item.name,
-        bindPropsKey: 'field', // 绑定的值类型。暂时只支持组件
-        bindComponentId: '', // 绑定的值路径。暂时只支持组件 field 字段: '', // 绑定的值路径。暂时只支持组件 field 字段
-      })
-    })
-  }
+  const dataModel = dataModelList.value.find(item => item.id === taskForm.dataModelId);
+  if (!dataModel) return;
+  taskForm.dataModelParams = [];
+  // 将组件的 modelValue 与数据模型接口参数字段进行绑定
+  ['query', 'body'].forEach((key) => {
+    if (dataModel[key] && dataModel[key].length) {
+      dataModel[key].forEach((item) => {
+        taskForm.dataModelParams.push({
+          keyPath: `${key}.${item.name}`, // 参数路径。如 query.name
+          bindComponentId: '', // 绑定的组件 id
+        });
+      });
+    }
+  });
 }
 
 const handleAddTask = () => {
@@ -153,7 +150,7 @@ const handleSubmitTask = () => {
   let { id, name, type, dataModelId, dataModelParams } = taskForm
 
   if (!validateField(name, '名称') || !validateField(type, '任务类型')) return
-  if (type === 'api' && !validateField(dataModelId, '数据模型')) return
+  if (type === 'API' && !validateField(dataModelId, '数据模型')) return
   if (dialogMode.value === 'add' && tasksList.value.some(item => item.name === name)) {
     ElMessage({ message: '任务名称已存在', type: 'warning' })
     return
@@ -193,45 +190,6 @@ const handleDeleteTask = (row) => {
 const setTasksToStorage = (data) => {
   localStorage.setItem('plex-tasks', JSON.stringify(data));
 }
-
-// watch(
-//   () => taskForm.dataModelId,
-//   (newVal) => {
-//     if (!newVal) return
-//     const dataModel = dataModelList.value.find(item => item.id === newVal)
-//     if (!dataModel) return
-//     taskForm.dataModelParams = []
-//     if (dataModel.query && dataModel.query.length) {
-//       dataModel.query.map(item => {
-//         taskForm.dataModelParams.push({
-//           keyPath: 'query.' + item.name,
-//           bindPropsKey: 'field', // 绑定的值类型。暂时只支持组件 
-//           bindComponentId: '', // 绑定的值路径。暂时只支持组件 field 字段
-//         })
-//       })
-//     }
-//     if (dataModel.body && dataModel.body.length) {
-//       dataModel.body.map(item => {
-//         taskForm.dataModelParams.push({
-//           keyPath: 'body.' + item.name,
-//           bindPropsKey: 'field', // 绑定的值类型。暂时只支持组件
-//           bindComponentId: '', // 绑定的值路径。暂时只支持组件 field 字段: '', // 绑定的值路径。暂时只支持组件 field 字段
-//         })
-//       })
-//     }
-//   },
-//   {
-//     immediate: true
-//   }
-// )
-
-watch(
-  () => componentsTree.value,
-  (newVal) => {
-    console.log('>>> componentsTree.value: ', newVal);
-  },
-  { deep: true, immediate: true }
-)
 </script>
 
 <style scoped lang="less">

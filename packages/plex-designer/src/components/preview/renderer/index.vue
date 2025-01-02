@@ -7,7 +7,7 @@
       :is="component.type"
       :style="componentStyle"
       v-bind="normalizeProps"
-      v-model="dataBind[`${component.id}.${normalizeProps.field}`]"
+      v-model="dataBind[`${component.id}.modelValue`]"
       v-on="normalizeEvents"
     >
       <!-- 递归渲染子组件 -->
@@ -26,7 +26,6 @@
 
 <script setup>
 import { ref, watch, computed, onMounted, inject } from 'vue';
-import axios from 'axios';
 import _ from 'lodash';
 
 defineOptions({
@@ -64,7 +63,6 @@ const emit = defineEmits([
   'onCustomEvent',
 ]);
 
-const dataModelList = inject('dataModelList');
 const dataBind = inject('dataBind');
 
 // 把 component.schema.props 从数组转换成对象
@@ -135,45 +133,6 @@ const wrapperStyle = computed(() => {
   }
   return { ...normalizeStyle.value };
 })
-
-const fetchApi = async (url, method, query, body) => {
-  try {
-    const response = await axios({ method, url });
-    return response.data;
-  } catch (error) {
-    console.error(error);
-  }
-}
-
-// const findBindDataModel = (dataModelValue) => {
-//   const dataModelValue = normalizeProps.value.dataModel;
-//   if (!dataModelValue) return {};
-//   // dataModelPath 的格式示例：hWzC3X1M5wgbr5s2.response.data.username
-//   const dataModelId = dataModelValue.split('.')[0];
-//   const dataModelFieldType = dataModelValue.split('.')[1];
-//   const dataModelFieldPath = dataModelValue.split('.').slice(2).join('.');
-//   const dataModel = dataModelList.value.find(item => item.id === dataModelId);
-//   if (!dataModel) return {};
-//   const { url, method } = dataModel;
-//   return { url, method, dataModelId, dataModelFieldType, dataModelFieldPath };
-// }
-
-// onMounted(async () => {
-//   if (dataModelList.value.length) {
-//     for (const key in normalizeProps.value) {
-//       // 数据模型动态绑定
-//       if (key === 'dataModel') {
-//         const { url, method, dataModelFieldType, dataModelFieldPath } = findBindDataModel();
-//         if (!url || !method) return;
-//         const res = await fetchApi(url, method)
-//         if (!res) return;
-//         if (dataModelFieldType === 'response') {
-//           dataBind[`${props.component.id}.${normalizeProps.value['field']}`] = _.get(res, dataModelFieldPath);
-//         }
-//       }
-//     }
-//   }
-// })
 
 // 监听 activeComponentNode.schema
 watch(

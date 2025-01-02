@@ -1,13 +1,15 @@
 <template>
-  <div class="plex-input">
+  <div class="plex-select">
     <label>{{ label }}</label>
-    <input v-model="model" :placeholder="placeholder" :type="type"/>
+    <select v-model="model" :placeholder="placeholder">
+      <option v-for="option in options" :value="option[optionValue]">{{ option[optionName] }}</option>
+    </select>
   </div>
 </template>
 
 <script setup>
 defineOptions({
-  name: 'PlexInput'
+  name: 'PlexSelect'
 })
 
 const model = defineModel()
@@ -21,22 +23,30 @@ const props = defineProps({
     type: String,
     default: ''
   },
-  type: {
+  optionName: {
     type: String,
-    default: 'text'
+    default: ''
+  },
+  optionValue: {
+    type: String,
+    default: ''
+  },
+  options: {
+    type: Array,
+    default: () => []
   }
 });
 </script>
 
 <style scoped lang="less">
-.plex-input {
+.plex-select {
   margin-bottom: 16px;
   label {
     display: block;
     margin-bottom: 4px;
     font-weight: bold;
   }
-  input {
+  select {
     box-sizing: border-box;
     width: 100%;
     padding: 8px;

@@ -20,16 +20,11 @@ const props = [
     value: '请输入内容'
   },
   {
-    label: '绑定字段名',
+    label: '数据源绑定',
     type: 'string',
-    key: 'field',
-    value: ''
-  },
-  {
-    label: '绑定数据模型',
-    type: 'string',
-    key: 'dataModel',
-    value: ''
+    key: 'modelValue',
+    value: '',
+    bindDataModel: '' // 标识需要绑定数据模型
   }
 ];
 
