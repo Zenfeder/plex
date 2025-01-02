@@ -5,19 +5,19 @@ const style = [
     key: 'display',
     type: 'string',
     options: ['inline-block', 'block'],
-    value: 'inline-block'
+    defaultValue: 'inline-block'
   },
   {
     label: '宽度',
     key: 'width',
     type: 'string',
-    value: '100%'
+    defaultValue: '100%'
   },
   {
     label: '高度',
     key: 'height',
     type: 'string',
-    value: '300px'
+    defaultValue: '300px'
   }
 ];
 

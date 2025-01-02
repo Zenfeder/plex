@@ -4,50 +4,50 @@ const style = [
     label: '宽度',
     key: 'width',
     type: 'string',
-    value: '200px'
+    defaultValue: '200px'
   },
   {
     label: '文字颜色',
     key: 'color',
     type: 'color',
-    value: ''
+    defaultValue: ''
   },
   {
     label: '背景颜色',
     key: 'backgroundColor',
     type: 'color',
-    value: ''
+    defaultValue: ''
   },
   {
     label: '边框颜色',
     key: 'borderColor',
     type: 'color',
-    value: ''
+    defaultValue: ''
   },
   {
     label: '边框宽度',
     key: 'borderWidth',
-    type: 'number',
-    value: 0
+    type: 'string',
+    defaultValue: '0px'
   },
   {
     label: '边框圆角',
     key: 'borderRadius',
-    type: 'number',
-    value: 0
+    type: 'string',
+    defaultValue: '0px'
   },
   {
     label: '边框类型',
     key: 'borderStyle',
     type: 'string',
     options: ['solid', 'dashed', 'dotted'],
-    value: 'solid'
+    defaultValue: 'solid'
   },
   {
     label: '字体大小',
     key: 'fontSize',
-    type: 'number',
-    value: 14
+    type: 'string',
+    defaultValue: '14px'
   }
 ];
 

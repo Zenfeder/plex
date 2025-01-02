@@ -101,6 +101,22 @@ const handleComponentNodeDelete = (component) => {
   emit('onComponentNodeDelete', component);
 };
 
+const initPropsValue = () => {
+  if (!props.component?.schema?.props) return;
+  props.component.schema.props.forEach(prop => {
+    prop.value = prop.defaultValue;
+  });
+}
+
+const initStyleValue = () => {
+  if (!props.component?.schema?.style) return;
+  props.component.schema.style.forEach(style => {
+    style.value = style.defaultValue;
+  });
+}
+initPropsValue();
+initStyleValue();
+
 // 把 component.schema.props 从数组转换成对象
 const normalizeProps = computed(() => {
   if (!props.component?.schema?.props) return {};

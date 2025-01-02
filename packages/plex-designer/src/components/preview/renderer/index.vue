@@ -65,6 +65,29 @@ const emit = defineEmits([
 
 const dataBind = inject('dataBind');
 
+const initPropsValue = () => {
+  if (!props.component?.schema?.props) return;
+  props.component.schema.props.forEach(prop => {
+    if (prop.hasOwnProperty('bindDataModel') && prop.value) {
+      prop.value = undefined;
+    } else {
+      prop.value = prop.value === undefined ? prop.defaultValue : prop.value;
+    }
+  });
+}
+const initStyleValue = () => {
+  if (!props.component?.schema?.style) return;
+  props.component.schema.style.forEach(style => {
+    if (style.hasOwnProperty('bindDataModel') && style.value) {
+      style.value = undefined;
+    } else {
+      style.value = style.value === undefined ? style.defaultValue : style.value;
+    }
+  });
+}
+initPropsValue();
+initStyleValue();
+
 // 把 component.schema.props 从数组转换成对象
 const normalizeProps = computed(() => {
   if (!props.component?.schema?.props) return {};

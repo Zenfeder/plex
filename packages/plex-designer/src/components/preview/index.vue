@@ -97,7 +97,8 @@ const handleCustomEvent = ({ eventName, taskQueue, event }) => {
         if (bindFieldType === 'response' && bindDataModelId === taskDataModelId) {
           const bindFieldValue = _.get(response, bindFieldPath);  
           dataBind[`${id}.${targetProps.key}`] = bindFieldValue === undefined ? dataBind[`${id}.${targetProps.key}`] : bindFieldValue;
-          targetProps.value = dataBind[`${id}.${targetProps.key}`]; // 这样会有数据缓存，组件树渲染时直接拿这个值渲染了
+          // Todo: 优化，这样会有数据缓存，组件树渲染时直接拿这个值渲染了
+          targetProps.value = dataBind[`${id}.${targetProps.key}`];
         }
       })
     }
