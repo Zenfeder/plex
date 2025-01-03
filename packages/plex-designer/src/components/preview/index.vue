@@ -14,7 +14,6 @@ import { ref, provide, inject, reactive, onMounted } from 'vue';
 import axios from 'axios';
 import _, { isArray } from 'lodash';
 import PreviewRenderer from './renderer';
-import { findComponentNodeById } from '../../utils/component-tree-tools';
 import { useFlattenAndFilterComponentTree } from '../../hooks/components-tree-helper';
 
 const componentsTree = inject('componentsTree');
@@ -62,7 +61,6 @@ const initDataBind = () => {
 }
 
 initDataBind();
-console.log('>>> after init dataBind: ', dataBind);
 
 const handleCustomEvent = ({ eventName, taskQueue, event }) => {
   taskQueue.forEach(async task => {
@@ -84,6 +82,7 @@ const handleCustomEvent = ({ eventName, taskQueue, event }) => {
       }
 
       // 数据模型响应绑定
+      // Todo：这是阻塞型任务，还有非阻塞型任务
       const response = await fetchApi(url, method, query, {});
       componentListBindDataModel.value.forEach(component => {
         const { id, schema } = component;
